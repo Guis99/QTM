@@ -2,8 +2,9 @@
 
 using namespace QTM;
 
-Cell::Cell(std::shared_ptr<Cell> parent, double width, double xPos, double yPos, int deg) {
+Cell::Cell(std::shared_ptr<Cell> parent, int level, double width, double xPos, double yPos, int deg) {
     this->parent = parent;
+    this->level = level;
     this->center = { xPos, yPos };
     this->width = width;
     this->deg = deg;
@@ -123,6 +124,48 @@ std::vector<std::shared_ptr<Cell>> Cell::subneighbors(std::shared_ptr<Cell> neig
 
             return neighbors;
         }
+
+        case Direction::E : {
+            while (candidates.size() > 0) {
+                if (candidates[0]->isLeaf()) {
+                    neighbors.push_back(candidates[0]);
+                } else {
+                    candidates.push_back(candidates[0]->children[Child::NW]);
+                    candidates.push_back(candidates[0]->children[Child::SW]);
+                }
+                candidates.erase(candidates.begin());
+            }
+
+            return neighbors;
+        }
+
+        case Direction::S : {
+            while (candidates.size() > 0) {
+                if (candidates[0]->isLeaf()) {
+                    neighbors.push_back(candidates[0]);
+                } else {
+                    candidates.push_back(candidates[0]->children[Child::NW]);
+                    candidates.push_back(candidates[0]->children[Child::NE]);
+                }
+                candidates.erase(candidates.begin());
+            }
+
+            return neighbors;
+        }
+
+        case Direction::W : {
+            while (candidates.size() > 0) {
+                if (candidates[0]->isLeaf()) {
+                    neighbors.push_back(candidates[0]);
+                } else {
+                    candidates.push_back(candidates[0]->children[Child::NE]);
+                    candidates.push_back(candidates[0]->children[Child::SE]);
+                }
+                candidates.erase(candidates.begin());
+            }
+
+            return neighbors;
+        }
     }
 }
 
@@ -136,10 +179,10 @@ void Cell::subdivide() {
     std::shared_ptr<Cell> parentPtr = std::shared_ptr<Cell>(this);
 
     // Starting from upper-right quadrant going CW
-    this->children[0] = std::make_shared<Cell>(parentPtr, subWidth, x+subWidth, y+subWidth, this->deg);
-    this->children[1] = std::make_shared<Cell>(parentPtr, subWidth, x+subWidth, y-subWidth, this->deg);
-    this->children[2] = std::make_shared<Cell>(parentPtr, subWidth, x-subWidth, y-subWidth, this->deg);
-    this->children[3] = std::make_shared<Cell>(parentPtr, subWidth, x-subWidth, y+subWidth, this->deg);
+    this->children[0] = std::make_shared<Cell>(parentPtr, level+1, subWidth, x+subWidth, y+subWidth, this->deg);
+    this->children[1] = std::make_shared<Cell>(parentPtr, level+1, subWidth, x+subWidth, y-subWidth, this->deg);
+    this->children[2] = std::make_shared<Cell>(parentPtr, level+1, subWidth, x-subWidth, y-subWidth, this->deg);
+    this->children[3] = std::make_shared<Cell>(parentPtr, level+1, subWidth, x-subWidth, y+subWidth, this->deg);
 
     // Updating nodes
 

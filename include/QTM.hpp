@@ -39,7 +39,9 @@ namespace QTM {
             double width;
             std::array<double, 2> center;
 
-            Cell(std::shared_ptr<Cell> parent, double width, double xPos, double yPos, int deg);
+            int level;
+
+            Cell(std::shared_ptr<Cell> parent, int level, double width, double xPos, double yPos, int deg);
             void subdivide();
             void undivide();
             std::shared_ptr<Cell> geqNeighbor(Direction direction);
