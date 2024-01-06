@@ -166,6 +166,8 @@ std::vector<std::shared_ptr<Cell>> Cell::subneighbors(std::shared_ptr<Cell> neig
 
             return neighbors;
         }
+
+        return neighbors;
     }
 }
 
@@ -187,4 +189,57 @@ void Cell::subdivide() {
     // Updating nodes
 
 };
+
+void Cell::undivide() {
+    // Call via consensus - if all four children are below target residual, undivide
+    this->isaLeaf = true;
+    this->children = { nullptr, nullptr, nullptr, nullptr };
+}
+
+std::vector<std::shared_ptr<Cell>> Cell::traverse() {
+    std::vector<std::shared_ptr<Cell>> out;
+    std::stack<std::shared_ptr<Cell>> toProcess;
+
+    std::shared_ptr<Cell> currCell(this); 
+    toProcess.push(currCell);
+
+    std::cout<<children.size()<<std::endl;
+    for (auto child : children) {
+        std::cout<<child->isLeaf()<<std::endl;
+    }
+
+    while (!toProcess.empty()) { // iterative
+        std::cout<<"stack size: "<<toProcess.size()<<std::endl;
+        std::cout<<"here1"<<std::endl;
+        auto CurrCell = toProcess.top();
+        std::cout<<"here1"<<std::endl;
+        toProcess.pop();
+        std::cout<<"here1"<<std::endl;
+        if (CurrCell->isLeaf()) {
+            std::cout<<"here2"<<std::endl;
+            out.push_back(CurrCell);
+            std::cout<<"here3"<<std::endl;
+        } else {
+            for (int i=3; i>=0; i--) {
+                toProcess.push(CurrCell->children[i]);
+            }
+        }
+    }
+
+    std::cout<<out.size()<<std::endl;
+
+    return out;
+
+    // // recursive approach
+    // auto currCell = std::make_shared<Cell>(this);
+    // if (isLeaf()) {
+    //     global_store.push_back(currCell);
+    // } else {
+    //     for (int i=0; i<4; i++) {
+    //         this->children[i]->traverse();
+    //     }
+    // }
+
+
+}
     
