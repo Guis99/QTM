@@ -29,7 +29,7 @@ namespace QTM {
             Node(int NID, std::array<double, 2> Position, int nClass);
     };
 
-    class Cell {
+    class Cell : public std::enable_shared_from_this<Cell> {
         public:
             std::shared_ptr<Cell> parent = nullptr;
             std::array<std::shared_ptr<Cell>, 4> children = {nullptr, nullptr, nullptr, nullptr};
@@ -42,11 +42,15 @@ namespace QTM {
             int level;
 
             Cell(std::shared_ptr<Cell> parent, int level, double width, double xPos, double yPos, int deg);
+
+            std::shared_ptr<Cell> getptr () { return shared_from_this(); }
+
             void subdivide();
             void undivide();
             std::shared_ptr<Cell> geqNeighbor(Direction direction);
             std::vector<std::shared_ptr<Cell>> subneighbors(std::shared_ptr<Cell> neighbor, Direction direction);
             std::vector<std::shared_ptr<Cell>> traverse();
+            int selfdelete();
             bool isLeaf() { return isaLeaf; }
         private:
             bool isaLeaf = true;

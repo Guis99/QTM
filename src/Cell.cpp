@@ -178,8 +178,7 @@ void Cell::subdivide() {
     double subWidth = this->width/2;
     double x = this->center[0];
     double y = this->center[1];
-    std::shared_ptr<Cell> parentPtr = std::shared_ptr<Cell>(this);
-
+    auto parentPtr = shared_from_this();
     // Starting from upper-right quadrant going CW
     this->children[0] = std::make_shared<Cell>(parentPtr, level+1, subWidth, x+subWidth, y+subWidth, this->deg);
     this->children[1] = std::make_shared<Cell>(parentPtr, level+1, subWidth, x+subWidth, y-subWidth, this->deg);
@@ -200,25 +199,20 @@ std::vector<std::shared_ptr<Cell>> Cell::traverse() {
     std::vector<std::shared_ptr<Cell>> out;
     std::stack<std::shared_ptr<Cell>> toProcess;
 
-    std::shared_ptr<Cell> currCell(this); 
-    toProcess.push(currCell);
-
-    std::cout<<children.size()<<std::endl;
-    for (auto child : children) {
-        std::cout<<child->isLeaf()<<std::endl;
+    if (isLeaf()) {
+        std::vector<std::shared_ptr<Cell>> out = { getptr() };
+        return out;
+    }
+     
+    for (int i=3; i>=0; i--) {
+        toProcess.push(children[i]);
     }
 
     while (!toProcess.empty()) { // iterative
-        std::cout<<"stack size: "<<toProcess.size()<<std::endl;
-        std::cout<<"here1"<<std::endl;
         auto CurrCell = toProcess.top();
-        std::cout<<"here1"<<std::endl;
         toProcess.pop();
-        std::cout<<"here1"<<std::endl;
         if (CurrCell->isLeaf()) {
-            std::cout<<"here2"<<std::endl;
             out.push_back(CurrCell);
-            std::cout<<"here3"<<std::endl;
         } else {
             for (int i=3; i>=0; i--) {
                 toProcess.push(CurrCell->children[i]);
@@ -226,20 +220,6 @@ std::vector<std::shared_ptr<Cell>> Cell::traverse() {
         }
     }
 
-    std::cout<<out.size()<<std::endl;
-
     return out;
-
-    // // recursive approach
-    // auto currCell = std::make_shared<Cell>(this);
-    // if (isLeaf()) {
-    //     global_store.push_back(currCell);
-    // } else {
-    //     for (int i=0; i<4; i++) {
-    //         this->children[i]->traverse();
-    //     }
-    // }
-
-
 }
     
