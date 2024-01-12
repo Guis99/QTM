@@ -171,6 +171,29 @@ std::vector<std::shared_ptr<Cell>> Cell::subneighbors(std::shared_ptr<Cell> neig
     }
 }
 
+std::vector<std::shared_ptr<Cell>> Cell::getNeighbors() {
+    auto neighborN = geqNeighbor(Direction::N);
+    auto neighborE = geqNeighbor(Direction::E);
+    auto neighborS = geqNeighbor(Direction::S);
+    auto neighborW = geqNeighbor(Direction::W);
+
+    auto neighborsN = subneighbors(neighborN, Direction::N);
+    auto neighborsE = subneighbors(neighborE, Direction::E);
+    auto neighborsS = subneighbors(neighborS, Direction::S);
+    auto neighborsW = subneighbors(neighborW, Direction::W);
+
+    std::vector<std::shared_ptr<Cell>> out;
+    out.reserve(neighborsN.size() + neighborsE.size() + neighborsS.size() + neighborsW.size());
+
+    auto currPos = out.begin();
+    std::copy(neighborsN.begin(), neighborsN.end(), currPos); currPos += neighborsN.size();
+    std::copy(neighborsE.begin(), neighborsE.end(), currPos); currPos += neighborsE.size();
+    std::copy(neighborsS.begin(), neighborsS.end(), currPos); currPos += neighborsS.size();
+    std::copy(neighborsW.begin(), neighborsW.end(), currPos); currPos += neighborsW.size();
+
+    return out;
+}
+
 void Cell::subdivide() {
     this->isaLeaf = false;
 
@@ -178,7 +201,7 @@ void Cell::subdivide() {
     double subWidth = this->width/2;
     double x = this->center[0];
     double y = this->center[1];
-    auto parentPtr = shared_from_this();
+    auto parentPtr = getptr();
     // Starting from upper-right quadrant going CW
     this->children[0] = std::make_shared<Cell>(parentPtr, level+1, subWidth, x+subWidth, y+subWidth, this->deg);
     this->children[1] = std::make_shared<Cell>(parentPtr, level+1, subWidth, x+subWidth, y-subWidth, this->deg);

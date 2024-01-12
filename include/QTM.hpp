@@ -49,6 +49,7 @@ namespace QTM {
             void undivide();
             std::shared_ptr<Cell> geqNeighbor(Direction direction);
             std::vector<std::shared_ptr<Cell>> subneighbors(std::shared_ptr<Cell> neighbor, Direction direction);
+            std::vector<std::shared_ptr<Cell>> getNeighbors();
             std::vector<std::shared_ptr<Cell>> traverse();
             int selfdelete();
             bool isLeaf() { return isaLeaf; }
