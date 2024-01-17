@@ -2,12 +2,19 @@
 
 using namespace QTM;
 
-Cell::Cell(std::shared_ptr<Cell> parent, int level, double width, double xPos, double yPos, int deg) {
+Cell::Cell(std::shared_ptr<Cell> parent, int level, double width, double xPos, double yPos) {
     this->parent = parent;
     this->level = level;
     this->center = { xPos, yPos };
     this->width = width;
-    this->deg = deg;
+}
+
+Cell::Cell(int CID, std::shared_ptr<Cell> parent, int level, double width, double xPos, double yPos) {
+    this->CID = CID;
+    this->parent = parent;
+    this->level = level;
+    this->center = { xPos, yPos };
+    this->width = width;
 }
 
 std::shared_ptr<Cell> Cell::geqNeighbor(Direction direction) {
@@ -203,10 +210,10 @@ void Cell::subdivide() {
     double y = this->center[1];
     auto parentPtr = getptr();
     // Starting from upper-right quadrant going CW
-    this->children[0] = std::make_shared<Cell>(parentPtr, level+1, subWidth, x+subWidth, y+subWidth, this->deg);
-    this->children[1] = std::make_shared<Cell>(parentPtr, level+1, subWidth, x+subWidth, y-subWidth, this->deg);
-    this->children[2] = std::make_shared<Cell>(parentPtr, level+1, subWidth, x-subWidth, y-subWidth, this->deg);
-    this->children[3] = std::make_shared<Cell>(parentPtr, level+1, subWidth, x-subWidth, y+subWidth, this->deg);
+    this->children[0] = std::make_shared<Cell>(parentPtr, level+1, subWidth, x+subWidth, y+subWidth);
+    this->children[1] = std::make_shared<Cell>(parentPtr, level+1, subWidth, x+subWidth, y-subWidth);
+    this->children[2] = std::make_shared<Cell>(parentPtr, level+1, subWidth, x-subWidth, y-subWidth);
+    this->children[3] = std::make_shared<Cell>(parentPtr, level+1, subWidth, x-subWidth, y+subWidth);
 
     // Updating nodes
 

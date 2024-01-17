@@ -10,7 +10,7 @@ int main() {
 
     std::shared_ptr<Cell> initptr(nullptr);
 
-    auto tree1ptr = std::make_shared<Cell>(initptr, 0, 1, 0, 0, 1);
+    auto tree1ptr = std::make_shared<Cell>(initptr, 0, 1, 0, 0);
     tree1ptr->subdivide();
     tree1ptr->children[0]->subdivide();
     tree1ptr->children[1]->subdivide();
@@ -20,13 +20,13 @@ int main() {
     tree1ptr->children[0]->children[3]->children[0]->children[2]->subdivide();
     
     std::vector<std::shared_ptr<Cell>> leaves = tree1ptr->traverse();
-    for (auto ptr : leaves) {
-        std::cout<<ptr<<", "<<ptr->level<<std::endl;
-    }
+    // for (auto ptr : leaves) {
+    //     std::cout<<ptr<<", "<<ptr->level<<std::endl;
+    // }
 
     std::cout<<score[leaves.size() == 19]<<std::endl;
 
-    auto tree2ptr = std::make_shared<Cell>(initptr, 0, 1, 0, 0, 1);
+    auto tree2ptr = std::make_shared<Cell>(initptr, 0, 1, 0, 0);
     tree2ptr->subdivide();
     tree2ptr->children[0]->subdivide();
     tree2ptr->children[1]->subdivide();
@@ -37,9 +37,9 @@ int main() {
     
     std::vector<std::shared_ptr<Cell>> leaves2 = tree2ptr->traverse();
 
-    for (auto ptr : leaves2) {
-        std::cout<<ptr<<", "<<ptr->level<<std::endl;
-    }
+    // for (auto ptr : leaves2) {
+    //     std::cout<<ptr<<", "<<ptr->level<<std::endl;
+    // }
 
     inOrder &= leaves2[0] == tree2ptr->children[0]->children[0];
     inOrder &= leaves2[1] == tree2ptr->children[0]->children[1];
@@ -64,6 +64,10 @@ int main() {
     
 
     std::cout<<score[leaves2.size() == 16 && inOrder]<<std::endl;
+
+    auto tree3ptr = std::make_shared<Cell>(initptr, 0, 1, 0, 0);
+    auto leaves3 = tree3ptr->traverse();
+    std::cout<<score[leaves3.size() == 1 && tree3ptr == leaves3[0]]<<std::endl;
     
 
     return 0;
