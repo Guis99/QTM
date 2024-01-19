@@ -76,7 +76,7 @@ namespace QTM {
 
             std::vector<std::shared_ptr<Cell>> GetNeighborCells(int x, int y);
             std::vector<std::shared_ptr<Cell>> GetAllCells();
-            std::vector<int> GetBoundaryNodes(Direction direction, int CID;
+            std::vector<int> GetBoundaryNodes(Direction direction, int CID);
             void assignNodes();
     };
 }
