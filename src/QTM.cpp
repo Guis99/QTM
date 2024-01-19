@@ -4,6 +4,7 @@ using namespace QTM;
 
 QuadTreeMesh::QuadTreeMesh(int deg, int nx, int ny, double Lx, double Ly) {
     this->deg = deg;
+    this->numElemNodes = (deg+1)*(deg+1);
     this->nx = nx;
     this->ny = ny;
     double dx = Lx / nx; 
@@ -14,11 +15,10 @@ QuadTreeMesh::QuadTreeMesh(int deg, int nx, int ny, double Lx, double Ly) {
     topCells.reserve(nx*ny);
     for (int y=0; y<ny; y++) {
         for (int x=0; x<nx; x++) {
-            topCells.push_back(std::make_shared<Cell>(CID, nullptr, 0, dx/2, dx/2 + x*dx, dx/2 + y*dx));
-            CID++;
+            topCells.push_back(std::make_shared<Cell>(nullptr, 0, dx/2, dx/2 + x*dx, dx/2 + y*dx));
         }
     }
-    numLeaves = CID;
+    numLeaves = nx*ny;
     assignNodes();
 }
 
@@ -60,13 +60,43 @@ void QuadTreeMesh::assignNodes() {
 
 std::vector<std::shared_ptr<Cell>> QuadTreeMesh::GetAllCells() {
     std::vector<std::shared_ptr<Cell>> out;
-    out.resize(numLeaves);
-    int offset = 0;
+    out.reserve(numLeaves);
 
     for (auto baseCell : topCells) {
         auto leaves = baseCell->traverse();
-        std::copy(leaves.begin(), leaves.end(), out.begin()+offset);
-        offset += leaves.size();
+        out.insert(out.end(), leaves.begin(), leaves.end());
+    }
+
+    return out;
+}
+
+std::vector<int> QuadTreeMesh::GetBoundaryNodes(Direction direction, int CID) {
+    std::vector<int> out; out.reserve(deg+1);
+    int start = CID * numElemNodes;
+
+    switch (direction) {
+        case Direction::N : {
+            start += (deg+1)*deg;
+            break;
+        }
+
+        case Direction::E : {
+            start += deg;
+        }
+
+        case Direction::S : {
+            break;
+        }
+
+        case Direction::W : {
+            break;
+        }
+    }
+
+    int increment = (direction == Direction::N || direction == Direction::S) ? 1 : deg+1;
+
+    for (int i=0; i<deg+1; i++) {
+        out.push_back(start+increment*i);
     }
 
     return out;

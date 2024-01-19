@@ -192,11 +192,10 @@ std::vector<std::shared_ptr<Cell>> Cell::getNeighbors() {
     std::vector<std::shared_ptr<Cell>> out;
     out.reserve(neighborsN.size() + neighborsE.size() + neighborsS.size() + neighborsW.size());
 
-    auto currPos = out.begin();
-    std::copy(neighborsN.begin(), neighborsN.end(), currPos); currPos += neighborsN.size();
-    std::copy(neighborsE.begin(), neighborsE.end(), currPos); currPos += neighborsE.size();
-    std::copy(neighborsS.begin(), neighborsS.end(), currPos); currPos += neighborsS.size();
-    std::copy(neighborsW.begin(), neighborsW.end(), currPos); currPos += neighborsW.size();
+    out.insert(out.end(), neighborsN.begin(), neighborsN.end());
+    out.insert(out.end(), neighborsE.begin(), neighborsE.end());
+    out.insert(out.end(), neighborsS.begin(), neighborsS.end());
+    out.insert(out.end(), neighborsW.begin(), neighborsW.end());
 
     return out;
 }
