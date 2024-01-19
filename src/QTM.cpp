@@ -18,6 +18,8 @@ QuadTreeMesh::QuadTreeMesh(int deg, int nx, int ny, double Lx, double Ly) {
             CID++;
         }
     }
+    numLeaves = CID;
+    assignNodes();
 }
 
 std::vector<std::shared_ptr<Cell>> QuadTreeMesh::GetNeighborCells(int x, int y) {
@@ -45,12 +47,29 @@ std::vector<std::shared_ptr<Cell>> QuadTreeMesh::GetNeighborCells(int x, int y) 
 
 void QuadTreeMesh::assignNodes() {
     int currNode = 0;
+    int CID = 0;
     int numElementNodes = (deg+1)*(deg+1);
     for (auto baseCell : topCells) {
         auto leaves = baseCell->traverse();
         for (auto leaf : leaves) {
             leaf->setNodes(std::array<int,2>{currNode, currNode + numElementNodes - 1});
+            leaf->CID = CID;
+            CID++;
             currNode += numElementNodes;
         }
     }
+}
+
+std::vector<std::shared_ptr<Cell>> QuadTreeMesh::GetAllCells() {
+    std::vector<std::shared_ptr<Cell>> out;
+    out.resize(numLeaves);
+    int offset = 0;
+
+    for (auto baseCell : topCells) {
+        auto leaves = baseCell->traverse();
+        std::copy(leaves.begin(), leaves.end(), out.begin()+offset);
+        offset += leaves.size();
+    }
+
+    return out;
 }

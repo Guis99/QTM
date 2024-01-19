@@ -203,6 +203,7 @@ std::vector<std::shared_ptr<Cell>> Cell::getNeighbors() {
 
 void Cell::subdivide() {
     this->isaLeaf = false;
+    CID = -1;
 
     // Adding child cells
     double subWidth = this->width/2;

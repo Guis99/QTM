@@ -69,10 +69,12 @@ namespace QTM {
 
             int nx; int ny;
             int deg;
+            int numLeaves;
 
             QuadTreeMesh(int deg, int nx, int ny, double Lx, double Ly);
 
             std::vector<std::shared_ptr<Cell>> GetNeighborCells(int x, int y);
+            std::vector<std::shared_ptr<Cell>> GetAllCells();
             void assignNodes();
     };
 }
