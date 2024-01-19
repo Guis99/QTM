@@ -84,6 +84,7 @@ int main() {
         for (auto leaf : leaves) {
             numsExp &= leaf->nodes[0] == currNode && leaf->nodes[1] == currNode + numElementNodes - 1;
             currNode += numElementNodes;
+            std::cout<<leaf->CID<<": "<<leaf->level<<std::endl;
         }
     } 
 
@@ -91,6 +92,7 @@ int main() {
     std::cout<<"test3:"<<std::endl;
     std::cout<<score[numsExp]<<std::endl;
     std::cout<<score[mesh.GetAllCells().size() == 25]<<std::endl;
+
 
     return 0;
 }

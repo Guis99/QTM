@@ -25,8 +25,6 @@ QuadTreeMesh::QuadTreeMesh(int deg, int nx, int ny, double Lx, double Ly) {
 std::vector<std::shared_ptr<Cell>> QuadTreeMesh::GetNeighborCells(int x, int y) {
     std::vector<std::shared_ptr<Cell>> out; out.reserve(4);
 
-    std::shared_ptr<Cell> initptr(nullptr);
-
     int CID = nx*y + x;
     auto cell = topCells[CID];
 
