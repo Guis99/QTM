@@ -19,21 +19,11 @@ namespace QTM {
         W = 3
     };
 
-    class Node {
-        public:
-            int NID;
-            std::array<double, 2> Position;
-            int nClass;
-
-            Node();
-            Node(int NID, std::array<double, 2> Position, int nClass);
-    };
-
     class Cell : public std::enable_shared_from_this<Cell> {
         public:
             std::shared_ptr<Cell> parent = nullptr;
             std::array<std::shared_ptr<Cell>, 4> children = {nullptr, nullptr, nullptr, nullptr};
-            std::array<std::vector<std::shared_ptr<Cell>>, 4> neighbors; // each vector holds neighbors to North, East, South, West in that order
+            // std::array<std::vector<std::shared_ptr<Cell>>, 4> neighbors; // each vector holds neighbors to North, East, South, West in that order
 
             int CID;
             int deg;
@@ -65,18 +55,24 @@ namespace QTM {
     class QuadTreeMesh {
         public:
             std::vector<std::shared_ptr<Cell>> topCells;
-            std::vector<std::shared_ptr<Node>> allNodes;
+            std::vector<std::shared_ptr<Cell>> leaves;
 
             int nx; int ny;
             int deg;
             int numElemNodes;
             int numLeaves;
+            std::vector<double> gaussPoints;
 
             QuadTreeMesh(int deg, int nx, int ny, double Lx, double Ly);
 
             std::vector<std::shared_ptr<Cell>> GetNeighborCells(int x, int y);
+            std::shared_ptr<Cell> GetNeighborCell(Direction direction, int CID);
+            std::vector<std::shared_ptr<Cell>> GetCellNeighbors(Direction direction, int CID);
             std::vector<std::shared_ptr<Cell>> GetAllCells();
             std::vector<int> GetBoundaryNodes(Direction direction, int CID);
+            std::vector<std::array<double,2>> GetNodePos(std::vector<int> nodes);
+            std::vector<std::array<double,2>> AllNodePos();
+            void Refine(std::vector<std::shared_ptr<Cell>> cells);
             void assignNodes();
     };
 }
