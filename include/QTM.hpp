@@ -25,7 +25,7 @@ namespace QTM {
             std::array<std::shared_ptr<Cell>, 4> children = {nullptr, nullptr, nullptr, nullptr};
             // std::array<std::vector<std::shared_ptr<Cell>>, 4> neighbors; // each vector holds neighbors to North, East, South, West in that order
 
-            int CID;
+            int CID; int topIdx;
             int deg;
             double width;
             std::array<double, 2> center;
@@ -55,6 +55,7 @@ namespace QTM {
     class QuadTreeMesh {
         public:
             std::vector<std::shared_ptr<Cell>> topCells;
+            std::vector<std::vector<std::shared_ptr<Cell>>> topNeighbors;
             std::vector<std::shared_ptr<Cell>> leaves;
 
             int nx; int ny;
@@ -65,9 +66,9 @@ namespace QTM {
 
             QuadTreeMesh(int deg, int nx, int ny, double Lx, double Ly);
 
-            std::vector<std::shared_ptr<Cell>> GetNeighborCells(int x, int y);
-            std::shared_ptr<Cell> GetNeighborCell(Direction direction, int CID);
+            std::vector<std::shared_ptr<Cell>> GetTopNeighborCells(int x, int y);
             std::vector<std::shared_ptr<Cell>> GetCellNeighbors(Direction direction, int CID);
+            std::shared_ptr<Cell> geqNeighbor(Direction direction, std::shared_ptr<Cell> cell);
             std::vector<std::shared_ptr<Cell>> GetAllCells();
             std::vector<int> GetBoundaryNodes(Direction direction, int CID);
             std::vector<std::array<double,2>> GetNodePos(std::vector<int> nodes);

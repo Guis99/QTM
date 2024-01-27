@@ -13,7 +13,7 @@ int main() {
 
     for (int j=0; j<ny; j++) {
         for (int i=0; i<nx; i++) {
-            auto neighbors = mesh.GetNeighborCells(i,j);
+            auto neighbors = mesh.GetTopNeighborCells(i,j);
             for (auto neighbor : neighbors) {
                 if (neighbor.get() == nullptr) {
                     std::cout<<"outOfBounds"<<", ";

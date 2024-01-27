@@ -17,6 +17,60 @@ Cell::Cell(int CID, std::shared_ptr<Cell> parent, int level, double width, doubl
     this->width = width;
 }
 
+// std::shared_ptr<Cell> Cell::geqNeighbor(Direction direction) {
+//     Child currChild1; Child currChild2;
+//     Child nChild1; Child nChild2;
+
+//     switch (direction) {
+//         case Direction::N : {
+//             currChild1 = Child::SW;
+//             currChild2 = Child::SE;
+//             nChild1 = Child::NW;
+//             nChild2 = Child::NE;
+//         }
+
+//         case Direction::E : {
+//             currChild1 = Child::NW;
+//             currChild2 = Child::NE;
+//             nChild1 = Child::SW;
+//             nChild2 = Child::SE;
+//         }
+
+//         case Direction::S : {
+//             currChild1 = Child::NW;
+//             currChild2 = Child::NE;
+//             nChild1 = Child::SW;
+//             nChild2 = Child::SE;
+//         }
+
+//         default : {
+//             currChild1 = Child::NE;
+//             currChild2 = Child::SE;
+//             nChild1 = Child::NW;
+//             nChild2 = Child::SW;
+//         }
+//     }
+
+//     if (this->parent == nullptr) {
+//         return nullptr;
+//     } else if (this->parent->children[currChild1].get() == this) {
+//         return this->parent->children[nChild1];
+//     } else if (this->parent->children[currChild2].get() == this) {
+//         return this->parent->children[nChild2];
+//     }
+
+//     auto node = this->parent->geqNeighbor(direction);
+//     if (node == nullptr || node->isLeaf()) {
+//         return node;
+//     }
+
+//     if (this->parent->children[nChild1].get() == this) {
+//         return node->children[currChild1];
+//     } else {
+//         return node->children[currChild2];
+//     }
+// }
+
 std::shared_ptr<Cell> Cell::geqNeighbor(Direction direction) {
     switch (direction) {
         case Direction::N : {

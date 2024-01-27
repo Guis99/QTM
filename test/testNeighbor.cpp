@@ -10,24 +10,87 @@ int main() {
 
     std::shared_ptr<Cell> initptr(nullptr);
 
-    auto tree1ptr = std::make_shared<Cell>(initptr, 0, 1, 0, 0, 1);
+    // auto tree1ptr = std::make_shared<Cell>(initptr, 0, 1, 0, 0);
+    QuadTreeMesh mesh(1,1,1,1,1);
+
+    auto leave = mesh.GetAllCells();
+    auto tree1ptr = leave[0];
 
     tree1ptr->subdivide();
     tree1ptr->children[0]->subdivide();
     tree1ptr->children[0]->children[2]->subdivide();
-
-    auto neighborS = tree1ptr->children[0]->children[2]->geqNeighbor(Direction::S);
-    auto neighborN = tree1ptr->children[0]->children[2]->geqNeighbor(Direction::N);
-    auto neighborE = tree1ptr->children[0]->children[2]->geqNeighbor(Direction::E);
-    auto neighborW = tree1ptr->children[0]->children[2]->geqNeighbor(Direction::W);
+    tree1ptr->children[3]->subdivide();
+    tree1ptr->children[3]->children[1]->subdivide();
+    tree1ptr->children[3]->children[1]->children[1]->subdivide();
 
 
-    std::cout<<score[neighborS == tree1ptr->children[1] &&
-                    neighborN == tree1ptr->children[0]->children[3] && 
-                    neighborE == tree1ptr->children[0]->children[1] &&
-                    neighborW == tree1ptr->children[3]]<<std::endl;
+    int CID = 0;
+    auto leaves = tree1ptr->traverse();
+    for (auto leaf : leaves) {
+        leaf->CID = CID;
+        CID++;
+    }
+
+    auto neighborS = tree1ptr->children[0]->children[2]->children[2]->geqNeighbor(Direction::S);
+    auto neighborN = tree1ptr->children[0]->children[2]->children[2]->geqNeighbor(Direction::N);
+    auto neighborE = tree1ptr->children[0]->children[2]->children[2]->geqNeighbor(Direction::E);
+    auto neighborW = tree1ptr->children[0]->children[2]->children[2]->geqNeighbor(Direction::W);
+
+    std::cout<<neighborS->CID<<", "<<score[neighborS->CID == 7]<<std::endl;
+    std::cout<<neighborN->CID<<", "<<score[neighborN->CID == 5]<<std::endl;
+    std::cout<<neighborE->CID<<", "<<score[neighborE->CID == 3]<<std::endl;
+    std::cout<<score[neighborW == tree1ptr->children[3]->children[1]->children[1]]<<std::endl;
+
+    std::cout<<tree1ptr->children[0]->children[2]->children[2]->CID<<", "<<neighborN->CID<<", "<<neighborE->CID<<std::endl;
+
+    std::cout<<"test2"<<std::endl;
+    mesh = QuadTreeMesh(1,3,3,1,1);
+    std::cout<<"mesh success"<<std::endl;   
+
+    mesh.topCells[3]->subdivide();
+
+    mesh.topCells[4]->subdivide();
+
+    mesh.topCells[5]->subdivide();
+    mesh.topCells[5]->children[3]->subdivide();
+    mesh.topCells[5]->children[3]->children[3]->subdivide();
+
+    auto allcells = mesh.GetAllCells();
+    mesh.leaves = allcells;
+    mesh.assignNodes();
+
+    auto testcell1 = allcells[7];
+    auto testcell2 = mesh.topCells[0]; 
+
+    std::cout<<testcell1->CID<<", "<<testcell1->level<<std::endl;
+    neighborN = mesh.geqNeighbor(Direction::N, testcell1);
+    neighborE = mesh.geqNeighbor(Direction::E, testcell1);
+    neighborS = mesh.geqNeighbor(Direction::S, testcell1);
+    neighborW = mesh.geqNeighbor(Direction::W, testcell1);
+    std::cout<<allcells[22]->CID<<", "<<mesh.topCells[7]->CID<<std::endl;
+    std::cout<<score[neighborN == mesh.topCells[7]]<<std::endl;
+    std::cout<<score[neighborE == mesh.topCells[5]->children[3]]<<std::endl;
+    std::cout<<score[neighborS == allcells[8]]<<std::endl;
+    std::cout<<score[neighborW == allcells[10]]<<std::endl;
+
+    leaves = mesh.GetAllCells();
+
+    std::cout<<"cell2"<<std::endl;
+    neighborN = mesh.geqNeighbor(Direction::N, testcell2);
+    neighborE = mesh.geqNeighbor(Direction::E, testcell2);
+    neighborS = mesh.geqNeighbor(Direction::S, testcell2);
+    neighborW = mesh.geqNeighbor(Direction::W, testcell2);
+
+    std::cout<<score[neighborN == mesh.topCells[3]]<<std::endl;
+    std::cout<<neighborN->CID<<std::endl;
+    std::cout<<score[neighborE == mesh.topCells[1]]<<std::endl;
+    std::cout<<score[neighborS == nullptr]<<std::endl;
+    std::cout<<score[neighborW == nullptr]<<std::endl;
+
+
+    std::cout<<score[leaves.size() == 24]<<std::endl;
     
-    
 
+    
     return 0;
 }
