@@ -43,35 +43,21 @@ std::vector<std::shared_ptr<Cell>> QuadTreeMesh::GetTopNeighborCells(int x, int 
     std::vector<std::shared_ptr<Cell>> out; out.reserve(4);
 
     int CID = nx*y + x;
-    std::cout<<x<<", "<<y<<std::endl;
-    std::cout<<CID<<std::endl;
     auto cell = topCells[CID];
 
     std::vector<int> idxs = {cell->CID + nx, cell->CID + 1, cell->CID - nx, cell->CID - 1};
-    for (auto idx : idxs) {
-        std::cout<<idx<<std::endl;
-    }
+
     std::vector<int> xs = {0, 1, 0, -1};
     std::vector<int> ys = {1, 0, -1, 0};
 
     int xx; int yy;
     for (int i=0; i<4; i++) {
-        std::cout<<"indices: "<<x+xs[i] <<", "<< y+ys[i]<<std::endl;
         if (x+xs[i] < 0 || x+xs[i] >= nx || y+ys[i] < 0 || y+ys[i] >= ny) {
-            std::cout<<"nullpush"<<std::endl;
             out.push_back(nullptr);
         } else {
-            std::cout<<"cell: "<<topCells[idxs[i]]<<std::endl;
             out.push_back(topCells[idxs[i]]);
-            
-
         }
     }
-    if (x == 1 && y == 1) {
-        std::cout<<out.size()<<std::endl;
-        std::cout<<out[0]<<std::endl;
-    }
-    std::cout<<"---------"<<std::endl;
     return out;
 }
 
@@ -154,9 +140,54 @@ std::vector<std::array<double,2>> QuadTreeMesh::AllNodePos() {
 }
 
 void QuadTreeMesh::Refine(std::vector<std::shared_ptr<Cell>> cells) {
+    std::array<Direction,4> dirs = {Direction::N, Direction::E, Direction::S, Direction::W};
+
+    std::vector<std::shared_ptr<Cell>> neighbors;
+    std::vector<std::shared_ptr<Cell>> initNeighbors; initNeighbors.reserve(cells.size() * 4);
+
+    // loop over cells to subdivide
     for (auto leaf : cells) {
+        std::cout<<leaf<<std::endl;
+        for (auto dir : dirs) {
+            neighbors = GetCellNeighbors(dir, leaf->CID);
+            std::cout<<neighbors.size()<<std::endl;
+            for (auto neighbor : neighbors) {
+                std::cout<<leaf->CID<<", "<<neighbor->CID<<std::endl;
+                if (leaf->level - neighbor->level > 0) { // add neighbor if subdividing unbalances
+                    initNeighbors.push_back(neighbor);
+                }
+            }
+        }
+        std::cout<<"---------"<<std::endl;
         leaf->subdivide();
     }
+
+    // balancing
+    std::stack<std::shared_ptr<Cell>> toRefine;
+
+    // fill stack with cells that need balancing
+    for (auto cell : initNeighbors) {
+        if (cell->CID != -1) {
+            toRefine.push(cell);
+        }
+    }
+
+    // iterate over cells to refine
+    std::shared_ptr<Cell> currCell;
+    while (toRefine.size() > 0) {
+        currCell = toRefine.top();
+        toRefine.pop();
+        for (auto dir : dirs) {
+            neighbors = GetCellNeighbors(dir, currCell->CID);
+            for (auto neighbor : neighbors) {
+                if (neighbor->level - currCell->level > 1)  {
+                    toRefine.push(neighbor);
+                }
+            }
+        }
+        currCell->subdivide();
+    }
+
     leaves = GetAllCells();
     assignNodes();
 }
@@ -165,118 +196,154 @@ std::vector<std::shared_ptr<Cell>> QuadTreeMesh::GetCellNeighbors(Direction dire
     std::vector<std::shared_ptr<Cell>> out;
     auto cell = leaves[CID];
     auto neighbor = geqNeighbor(direction, cell);
+    std::cout<<cell->isLeaf()<<", geqn: "<<neighbor;
     if (neighbor != nullptr) {
+        std::cout<<", "<<neighbor->CID;
         out = cell->subneighbors(neighbor, direction);
         return out;
     } else {
         return out;
     }
+    std::cout<<std::endl;
 }
 
 std::shared_ptr<Cell> QuadTreeMesh::geqNeighbor(Direction direction, std::shared_ptr<Cell> cell) {
+    Child c1; Child c2; Child c3; Child c4;
+
     switch (direction) {
         case Direction::N : {
-            // base case
-            std::cout<<cell->level<<std::endl;
-            if (cell->parent == nullptr && cell->level > 0) {
-                return nullptr;
-            } else if (cell->level > 0 && cell->parent->children[Child::SW] == cell) {
-                return cell->parent->children[Child::NW];
-            } else if (cell->level > 0 && cell->parent->children[Child::SE] == cell) {
-                return cell->parent->children[Child::NE];
-            }
-
-            if (cell->level == 0) {
-                return topNeighbors[cell->topIdx][Direction::N];
-            } 
-
-            auto node = geqNeighbor(direction, cell->parent);
-            if (node == nullptr || node->isLeaf()) {
-                return node;
-            } else if (cell->parent->children[Child::NW] == cell) {
-                return node->children[Child::SW];
-            } else {
-                return node->children[Child::SE];
-            }
+            c1 = Child::SW; c2 = Child::SE; c3 = Child::NW; c4 = Child::NE;
             break;
         }
 
         case Direction::E : {
-            // base case
-            std::cout<<cell->level<<std::endl;
-            if (cell->level > 0 && cell->parent == nullptr) {
-                return nullptr;
-            } else if (cell->level > 0 && cell->parent->children[Child::NW] == cell) {
-                return cell->parent->children[Child::NE];
-            } else if (cell->level > 0 && cell->parent->children[Child::SW] == cell) {
-                return cell->parent->children[Child::SE];
-            }
-
-            if (cell->level == 0) {
-                return topNeighbors[cell->topIdx][Direction::E];
-            } 
-            
-            auto node = geqNeighbor(direction, cell->parent);
-            if (node == nullptr || node->isLeaf()) {
-                return node;
-            } else if (cell->parent->children[Child::NE] == cell) {
-                return node->children[Child::NW];
-            } else {
-                return node->children[Child::SW];
-            }
+            c1 = Child::NW; c2 = Child::SW; c3 = Child::NE; c4 = Child::SE;
             break;
         }
 
         case Direction::S : {
-            // base case
-            if (cell->level > 0 && cell->parent == nullptr) {
-                return nullptr;
-            } else if (cell->level > 0 && cell->parent->children[Child::NW] == cell) {
-                return cell->parent->children[Child::SW];
-            } else if (cell->level > 0 && cell->parent->children[Child::NE] == cell) {
-                return cell->parent->children[Child::SE];
-            }
-
-            if (cell->level == 0) {
-                return topNeighbors[cell->topIdx][Direction::S];
-            } 
-            
-            auto node = geqNeighbor(direction, cell->parent);
-            if (node == nullptr || node->isLeaf()) {
-                return node;
-            } else if (cell->parent->children[Child::SW] == cell) {
-                return node->children[Child::NW];
-            } else {
-                return node->children[Child::NE];
-            }
-
+            c1 = Child::NW; c2 = Child::NE; c3 = Child::SW; c4 = Child::SE;
             break;
         }
 
         case Direction::W : {
-            // base case
-            if (cell->level > 0 && cell->parent == nullptr) {
-                return nullptr;
-            } else if (cell->level > 0 && cell->parent->children[Child::NE] == cell) {
-                return cell->parent->children[Child::NW];
-            } else if (cell->level > 0 && cell->parent->children[Child::SE] == cell) {
-                return cell->parent->children[Child::SW];
-            }
-
-            if (cell->level == 0) {
-                return topNeighbors[cell->topIdx][Direction::W];
-            } 
-            
-            auto node = geqNeighbor(direction, cell->parent);
-                
-            if (node == nullptr || node->isLeaf()) {
-                return node;
-            } else if (cell->parent->children[Child::NW] == cell) {
-                return node->children[Child::NE];
-            } else {
-                return node->children[Child::SE];
-            }
+            c1 = Child::NE; c2 = Child::SE; c3 = Child::NW; c4 = Child::SW;
             break;
         }
     }
+
+    if (cell->level == 0) {
+        return topNeighbors[cell->topIdx][direction];
+    } else if (cell->parent == nullptr) {
+        return nullptr;
+    } else if (cell->parent->children[c1] == cell) {
+        return cell->parent->children[c3];
+    } else if (cell->parent->children[c2] == cell) {
+        return cell->parent->children[c4];
+    }
+
+    auto node = geqNeighbor(direction, cell->parent);
+    if (node == nullptr || node->isLeaf()) {
+        return node;
+    } else if (cell->parent->children[c3] == cell) {
+        return node->children[c1];
+    } else {
+        return node->children[c2];
+    }
 }
+
+// std::shared_ptr<Cell> QuadTreeMesh::geqNeighbor(Direction direction, std::shared_ptr<Cell> cell) {
+//     if (cell->level == 0) {
+//         return topNeighbors[cell->topIdx][direction];
+//     }
+//     switch (direction) {
+//         case Direction::N : {
+//             // base case
+//             std::cout<<cell->level<<std::endl;
+//             if (cell->parent == nullptr && cell->level > 0) {
+//                 return nullptr;
+//             } else if (cell->level > 0 && cell->parent->children[Child::SW] == cell) {
+//                 return cell->parent->children[Child::NW];
+//             } else if (cell->level > 0 && cell->parent->children[Child::SE] == cell) {
+//                 return cell->parent->children[Child::NE];
+//             }
+
+//             auto node = geqNeighbor(direction, cell->parent);
+//             if (node == nullptr || node->isLeaf()) {
+//                 return node;
+//             } else if (cell->parent->children[Child::NW] == cell) {
+//                 return node->children[Child::SW];
+//             } else {
+//                 return node->children[Child::SE];
+//             }
+//             break;
+//         }
+
+//         case Direction::E : {
+//             // base case
+//             std::cout<<cell->level<<std::endl;
+//             if (cell->level > 0 && cell->parent == nullptr) {
+//                 return nullptr;
+//             } else if (cell->level > 0 && cell->parent->children[Child::NW] == cell) {
+//                 return cell->parent->children[Child::NE];
+//             } else if (cell->level > 0 && cell->parent->children[Child::SW] == cell) {
+//                 return cell->parent->children[Child::SE];
+//             }
+            
+//             auto node = geqNeighbor(direction, cell->parent);
+//             if (node == nullptr || node->isLeaf()) {
+//                 return node;
+//             } else if (cell->parent->children[Child::NE] == cell) {
+//                 return node->children[Child::NW];
+//             } else {
+//                 return node->children[Child::SW];
+//             }
+//             break;
+//         }
+
+//         case Direction::S : {
+//             // base case
+//             if (cell->level > 0 && cell->parent == nullptr) {
+//                 return nullptr;
+//             } else if (cell->level > 0 && cell->parent->children[Child::NW] == cell) {
+//                 return cell->parent->children[Child::SW];
+//             } else if (cell->level > 0 && cell->parent->children[Child::NE] == cell) {
+//                 return cell->parent->children[Child::SE];
+//             }
+            
+//             auto node = geqNeighbor(direction, cell->parent);
+//             if (node == nullptr || node->isLeaf()) {
+//                 return node;
+//             } else if (cell->parent->children[Child::SW] == cell) {
+//                 return node->children[Child::NW];
+//             } else {
+//                 return node->children[Child::NE];
+//             }
+
+//             break;
+//         }
+
+//         case Direction::W : {
+//             // base case
+//             if (cell->level > 0 && cell->parent == nullptr) {
+//                 return nullptr;
+//             } else if (cell->level > 0 && cell->parent->children[Child::NE] == cell) {
+//                 return cell->parent->children[Child::NW];
+//             } else if (cell->level > 0 && cell->parent->children[Child::SE] == cell) {
+//                 return cell->parent->children[Child::SW];
+//             }
+
+            
+//             auto node = geqNeighbor(direction, cell->parent);
+                
+//             if (node == nullptr || node->isLeaf()) {
+//                 return node;
+//             } else if (cell->parent->children[Child::NW] == cell) {
+//                 return node->children[Child::NE];
+//             } else {
+//                 return node->children[Child::SE];
+//             }
+//             break;
+//         }
+//     }
+// }

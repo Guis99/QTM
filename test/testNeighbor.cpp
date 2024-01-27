@@ -62,12 +62,10 @@ int main() {
     auto testcell1 = allcells[7];
     auto testcell2 = mesh.topCells[0]; 
 
-    std::cout<<testcell1->CID<<", "<<testcell1->level<<std::endl;
     neighborN = mesh.geqNeighbor(Direction::N, testcell1);
     neighborE = mesh.geqNeighbor(Direction::E, testcell1);
     neighborS = mesh.geqNeighbor(Direction::S, testcell1);
     neighborW = mesh.geqNeighbor(Direction::W, testcell1);
-    std::cout<<allcells[22]->CID<<", "<<mesh.topCells[7]->CID<<std::endl;
     std::cout<<score[neighborN == mesh.topCells[7]]<<std::endl;
     std::cout<<score[neighborE == mesh.topCells[5]->children[3]]<<std::endl;
     std::cout<<score[neighborS == allcells[8]]<<std::endl;
@@ -75,14 +73,12 @@ int main() {
 
     leaves = mesh.GetAllCells();
 
-    std::cout<<"cell2"<<std::endl;
     neighborN = mesh.geqNeighbor(Direction::N, testcell2);
     neighborE = mesh.geqNeighbor(Direction::E, testcell2);
     neighborS = mesh.geqNeighbor(Direction::S, testcell2);
     neighborW = mesh.geqNeighbor(Direction::W, testcell2);
 
     std::cout<<score[neighborN == mesh.topCells[3]]<<std::endl;
-    std::cout<<neighborN->CID<<std::endl;
     std::cout<<score[neighborE == mesh.topCells[1]]<<std::endl;
     std::cout<<score[neighborS == nullptr]<<std::endl;
     std::cout<<score[neighborW == nullptr]<<std::endl;
