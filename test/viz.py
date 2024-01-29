@@ -9,6 +9,9 @@ def draw_cell(cell, ax):
     topLeftY = cell['y'] - half_side_length
 
     rect = patches.Rectangle((topLeftX, topLeftY), cell['width'], cell['width'], linewidth=1, edgecolor='r', facecolor='none')
+    if cell['isLeaf']:
+        ax.text(cell['x'], cell['y'], str(cell['CID']), ha='center', va='center', fontsize=8, color='blue')
+
     ax.add_patch(rect)
 
     if not cell['isLeaf']:
