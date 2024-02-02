@@ -21,65 +21,36 @@ std::vector<std::shared_ptr<Cell>> Cell::subneighbors(std::shared_ptr<Cell> neig
     std::vector<std::shared_ptr<Cell>> candidates = { neighbor };
     std::vector<std::shared_ptr<Cell>> neighbors;
 
+    Child c1; Child c2;
     switch (direction) {
         case Direction::N : {
-            while (candidates.size() > 0) {
-                if (candidates[0]->isLeaf()) {
-                    neighbors.push_back(candidates[0]);
-                } else {
-                    candidates.push_back(candidates[0]->children[Child::SW]);
-                    candidates.push_back(candidates[0]->children[Child::SE]);
-                }
-                candidates.erase(candidates.begin());
-            }
-
-            return neighbors;
+            c1 = Child::SW; c2 = Child::SE;
         }
 
         case Direction::E : {
-            while (candidates.size() > 0) {
-                if (candidates[0]->isLeaf()) {
-                    neighbors.push_back(candidates[0]);
-                } else {
-                    candidates.push_back(candidates[0]->children[Child::NW]);
-                    candidates.push_back(candidates[0]->children[Child::SW]);
-                }
-                candidates.erase(candidates.begin());
-            }
-
-            return neighbors;
+            c1 = Child::NW; c2 = Child::SW;
         }
 
         case Direction::S : {
-            while (candidates.size() > 0) {
-                if (candidates[0]->isLeaf()) {
-                    neighbors.push_back(candidates[0]);
-                } else {
-                    candidates.push_back(candidates[0]->children[Child::NW]);
-                    candidates.push_back(candidates[0]->children[Child::NE]);
-                }
-                candidates.erase(candidates.begin());
-            }
-
-            return neighbors;
+            c1 = Child::NW; c2 = Child::NE;
         }
 
         case Direction::W : {
-            while (candidates.size() > 0) {
-                if (candidates[0]->isLeaf()) {
-                    neighbors.push_back(candidates[0]);
-                } else {
-                    candidates.push_back(candidates[0]->children[Child::NE]);
-                    candidates.push_back(candidates[0]->children[Child::SE]);
-                }
-                candidates.erase(candidates.begin());
-            }
-
-            return neighbors;
+            c1 = Child::NE; c2 = Child::SE;
         }
-
-        return neighbors;
     }
+
+    while (candidates.size() > 0) {
+        if (candidates[0]->isLeaf()) {
+            neighbors.push_back(candidates[0]);
+        } else {
+            candidates.push_back(candidates[0]->children[c1]);
+            candidates.push_back(candidates[0]->children[c2]);
+        }
+        candidates.erase(candidates.begin());
+    }
+
+    return neighbors;
 }
 
 void Cell::subdivide() {

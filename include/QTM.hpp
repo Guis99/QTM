@@ -57,12 +57,16 @@ namespace QTM {
             std::vector<std::shared_ptr<Cell>> topCells;
             std::vector<std::vector<std::shared_ptr<Cell>>> topNeighbors;
             std::vector<std::shared_ptr<Cell>> leaves;
+            std::vector<std::shared_ptr<Cell>> boundaryCells;
 
             int nx; int ny;
             int deg;
             int numElemNodes;
             int numLeaves;
             std::vector<double> gaussPoints;
+            std::vector<double> halfGaussPoints;
+            std::vector<int> boundaryNodes;
+            std::vector<int> freeNodes;
 
             QuadTreeMesh(int deg, int nx, int ny, double Lx, double Ly);
 
@@ -70,11 +74,15 @@ namespace QTM {
             std::vector<std::shared_ptr<Cell>> GetCellNeighbors(Direction direction, int CID);
             std::shared_ptr<Cell> geqNeighbor(Direction direction, std::shared_ptr<Cell> cell);
             std::vector<std::shared_ptr<Cell>> GetAllCells();
-            std::vector<int> GetBoundaryNodes(Direction direction, int CID);
+            std::vector<int> GetLocalBoundaryNodes(Direction direction);
+            std::vector<int> GetGlobalBoundaryNodes(Direction direction, int CID);
             std::vector<std::array<double,2>> GetNodePos(std::vector<int> nodes);
             std::vector<std::array<double,2>> AllNodePos();
+            std::vector<int> getBoundaryNodes() {return boundaryNodes;};
+            std::vector<int> getFreeNodes() {return freeNodes;};
             void Refine(std::vector<std::shared_ptr<Cell>> cells);
             void assignNodes();
+            int nNodes() {return (deg+1)*(deg+1)*leaves.size();};
     };
 }
 

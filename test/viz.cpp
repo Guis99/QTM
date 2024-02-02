@@ -4,22 +4,26 @@
 
 using namespace QTM;
 
-void exportToJson(std::shared_ptr<Cell> root, std::ostream& out) {
-    out << "{";
-    out << "\"x\": " << root->center[0] << ", ";
-    out << "\"y\": " << root->center[1] << ", ";
-    out << "\"width\": " << 2*root->width << ", ";
-    out << "\"level\": " << root->level << ", ";
-    out << "\"isLeaf\": " << (root->isLeaf() ? "true" : "false") << ", ";
-    out << "\"CID\": " << root->CID << ", ";
-    out << "\"children\": [";
+void exportToJson(std::shared_ptr<Cell> root, std::ostream& out, int indent) {
+    std::string tabs;
+    for (int i=0; i<indent; i++) {
+        tabs += "\t";
+    }
+    out << tabs << "{";
+    out << "\"x\": " << root->center[0] << ",\n ";
+    out << tabs << "\"y\": " << root->center[1] << ",\n ";
+    out << tabs << "\"width\": " << 2*root->width << ",\n ";
+    out << tabs << "\"level\": " << root->level << ",\n ";
+    out << tabs << "\"isLeaf\": " << (root->isLeaf() ? "true" : "false") << ",\n ";
+    out << tabs << "\"CID\": " << root->CID << ",\n ";
+    out << tabs << "\"children\": [\n";
     for (int i = 0; i < 4; ++i) {
         if (root->children[i] != nullptr) {
-            if (i > 0) out << ", ";
-            exportToJson(root->children[i], out);
+            if (i > 0) out << ",\n ";
+            exportToJson(root->children[i], out, indent+1);
         }
     }
-    out << "]}";
+    out << tabs << "]}";
 }
 
 int main() {
@@ -40,13 +44,16 @@ int main() {
                 mesh.leaves[9],mesh.leaves[10],mesh.leaves[11],mesh.leaves[12]};
     mesh.Refine(toRefine);
 
-    toRefine = {mesh.leaves[30]};
+    toRefine = {mesh.leaves[14],mesh.leaves[15],mesh.leaves[16],mesh.leaves[17],
+                mesh.leaves[18],mesh.leaves[19],mesh.leaves[20],mesh.leaves[21],
+                mesh.leaves[22],mesh.leaves[23],mesh.leaves[24],mesh.leaves[25],
+                mesh.leaves[26],mesh.leaves[27],mesh.leaves[28],mesh.leaves[29]};
     mesh.Refine(toRefine);
 
-    toRefine = {mesh.leaves[30],mesh.leaves[36]};
+    toRefine = {mesh.leaves[33]};
     mesh.Refine(toRefine);
 
-    std::cout<<mesh.leaves.size()<<std::endl;
+    // std::cout<<mesh.leaves.size()<<std::endl;
     
     // toRefine = {mesh.leaves[15]};
     // mesh.Refine(toRefine);
@@ -62,6 +69,12 @@ int main() {
 
     // toRefine = {mesh.leaves[49]};
     // mesh.Refine(toRefine);
+
+    // int nx = 1; int ny = 1;
+    // QuadTreeMesh mesh(5, nx, ny, nx, ny);
+    
+    // mesh.leaves = mesh.GetAllCells();
+    // mesh.assignNodes();
 
     // mesh.topCells[0]->subdivide();
     // mesh.topCells[0]->children[1]->subdivide();
@@ -96,15 +109,15 @@ int main() {
 
     std::ofstream outFile("quadtree.json");
     outFile << "{";
-    outFile << "\"x\": " << 0 << ", ";
-    outFile << "\"y\": " << 0 << ", ";
-    outFile << "\"width\": " << 0 << ", ";
-    outFile << "\"level\": " << 0 << ", ";
-    outFile << "\"isLeaf\": " << "false" << ", ";
-    outFile << "\"CID\": " << 0 << ", ";
-    outFile << "\"children\": [";
+    outFile << "\"x\": " << 0 << ",\n ";
+    outFile << "\"y\": " << 0 << ",\n ";
+    outFile << "\"width\": " << 0 << ",\n ";
+    outFile << "\"level\": " << 0 << ",\n ";
+    outFile << "\"isLeaf\": " << "false" << ",\n ";
+    outFile << "\"CID\": " << 0 << ",\n ";
+    outFile << "\"children\": [\n";
     for (auto cell : mesh.topCells) {
-        exportToJson(cell, outFile);
+        exportToJson(cell, outFile, 1);
         if (cell != mesh.topCells.back()) {
             outFile << ", ";
         }

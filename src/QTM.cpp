@@ -33,9 +33,13 @@ QuadTreeMesh::QuadTreeMesh(int deg, int nx, int ny, double Lx, double Ly) {
     numLeaves = nx*ny;
     assignNodes();
     gaussPoints.reserve(deg+1);
+    halfGaussPoints.reserve(deg+1);
 
     for (int i=0; i < deg+1; i++) {
         gaussPoints.push_back(-cos(i*PI/deg));
+    }
+    for (double gp : gaussPoints) {
+        halfGaussPoints.push_back((gp+1)/2 - 1);
     }
 }
 
@@ -75,23 +79,46 @@ void QuadTreeMesh::assignNodes() {
 }
 
 std::vector<std::shared_ptr<Cell>> QuadTreeMesh::GetAllCells() {
-    std::cout<<"debug1"<<std::endl;
     std::vector<std::shared_ptr<Cell>> out;
-    std::cout<<"debug1"<<std::endl;
     out.reserve(numLeaves);
-    std::cout<<"debug2"<<std::endl;
 
     for (auto baseCell : topCells) {
         auto leaves = baseCell->traverse();
-        std::cout<<"debug3"<<std::endl;
         out.insert(out.end(), leaves.begin(), leaves.end());
-        std::cout<<"debug4"<<std::endl;
     }
 
     return out;
 }
 
-std::vector<int> QuadTreeMesh::GetBoundaryNodes(Direction direction, int CID) {
+std::vector<int> QuadTreeMesh::GetLocalBoundaryNodes(Direction direction) {
+    std::vector<int> out; out.reserve(deg+1);
+    int start = 0;
+
+    switch (direction) {
+        case Direction::N : {
+            start += (deg+1)*deg;
+            break;
+        }
+
+        case Direction::E : {
+            start += deg;
+        }
+
+        default : {
+            break;
+        }
+    }
+
+    int increment = (direction == Direction::N || direction == Direction::S) ? 1 : deg+1;
+
+    for (int i=0; i<deg+1; i++) {
+        out.push_back(start+increment*i);
+    }
+
+    return out;
+}
+
+std::vector<int> QuadTreeMesh::GetGlobalBoundaryNodes(Direction direction, int CID) {
     std::vector<int> out; out.reserve(deg+1);
     int start = CID * numElemNodes;
 
@@ -152,22 +179,14 @@ void QuadTreeMesh::Refine(std::vector<std::shared_ptr<Cell>> cells) {
 
     // loop over cells to subdivide
     for (auto leaf : cells) {
-        std::cout<<leaf<<std::endl;
         for (auto dir : dirs) {
             neighbors = GetCellNeighbors(dir, leaf->CID);
-            std::cout<<"nn: "<<neighbors.size()<<std::endl;
             for (auto neighbor : neighbors) {
-                std::cout<<leaf->CID<<", "<<neighbor->CID<<std::endl;
-                if (leaf->level - neighbor->level > 0) { // add neighbor if subdividing unbalances
-                    std::cout<<"neighbor added with CID: "<<neighbor->CID<<std::endl;
+                if (neighbor->isLeaf() && leaf->level - neighbor->level > 0) { // add neighbor if subdividing unbalances
                     initNeighbors.push_back(neighbor);
                 }
             }
         }
-        std::cout<<"---------"<<std::endl;
-        // leaf->subdivide();
-    }
-    for (auto leaf : cells) {
         leaf->subdivide();
     }
 
@@ -177,64 +196,42 @@ void QuadTreeMesh::Refine(std::vector<std::shared_ptr<Cell>> cells) {
     std::cout<<"pushing to stack"<<std::endl;
     // fill stack with cells that need balancing
     for (auto cell : initNeighbors) {
-        if (cell->isLeaf() && cell->CID != -1) {
-            std::cout<<cell<<", "<<cell->level<<", "<<cell->center[0]<<", "<<cell->center[1]<<std::endl;
-            toRefine.push(cell);
-        }
+        toRefine.push(cell);
     }
 
     // iterate over cells to refine
     std::cout<<"recursively subdividing neighbors"<<std::endl;
     std::shared_ptr<Cell> currCell;
     while (toRefine.size() > 0) {
-        std::cout<<"lol1"<<std::endl;
-        std::cout<<toRefine.size()<<std::endl;
         currCell = toRefine.top();
-        std::cout<<"lol2"<<std::endl;
         toRefine.pop();
-        std::cout<<"lol3"<<std::endl;
-        for (auto dir : dirs) {
-            std::cout<<"lol4: "<<currCell->CID<<std::endl;
-            if (currCell->isLeaf()) {
+        if (currCell->isLeaf()) {
+            for (auto dir : dirs) {
                 neighbors = GetCellNeighbors(dir, currCell->CID);
-                std::cout<<"lol5"<<std::endl;
                 for (auto neighbor : neighbors) {
                     if (currCell->level - neighbor->level > 0)  {
-                        std::cout<<"neighbor added with CID: "<<neighbor->CID<<std::endl;
                         toRefine.push(neighbor);
                     }
                 }
             }
-        }
-        std::cout<<"here1"<<std::endl;
-        if (currCell->isLeaf()) {
-            std::cout<<"here2"<<std::endl;
             currCell->subdivide();
-            std::cout<<"here3"<<std::endl;
         }
     }
 
     leaves = GetAllCells();
-    std::cout<<"here4"<<std::endl;
     assignNodes();
-    std::cout<<"here5"<<std::endl;
 }
 
 std::vector<std::shared_ptr<Cell>> QuadTreeMesh::GetCellNeighbors(Direction direction, int CID) {
     std::vector<std::shared_ptr<Cell>> out;
     auto cell = leaves[CID];
     auto neighbor = geqNeighbor(direction, cell);
-    std::cout<<cell->isLeaf()<<", geqn: "<<neighbor;
     if (neighbor != nullptr) {
-        std::cout<<", "<<neighbor->CID;
-        std::cout<<std::endl;
         out = cell->subneighbors(neighbor, direction);
         return out;
     } else {
-        std::cout<<std::endl;
         return out;
     }
-    
 }
 
 std::shared_ptr<Cell> QuadTreeMesh::geqNeighbor(Direction direction, std::shared_ptr<Cell> cell) {
