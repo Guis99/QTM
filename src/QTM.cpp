@@ -14,12 +14,15 @@ QuadTreeMesh::QuadTreeMesh(int deg, int nx, int ny, double Lx, double Ly) {
     int CID = 0;
     topCells.reserve(nx*ny);
     topNeighbors.reserve(nx*ny);
+    boundaryCells.reserve(2*(nx+ny-2));
     for (int y=0; y<ny; y++) {
         for (int x=0; x<nx; x++) {
             auto nextCell = std::make_shared<Cell>(nullptr, 0, dx/2, dx/2 + x*dx, dx/2 + y*dx);
             nextCell->CID = CID; nextCell->topIdx = CID; CID++;
-
             topCells.push_back(nextCell);
+            if (x==0 || x==nx-1 || y==0 || y==ny-1) {
+                boundaryCells.push_back(nextCell);
+            }
         }
     }
 
@@ -33,7 +36,7 @@ QuadTreeMesh::QuadTreeMesh(int deg, int nx, int ny, double Lx, double Ly) {
     numLeaves = nx*ny;
     assignNodes();
     gaussPoints.reserve(deg+1);
-    halfGaussPoints.reserve(deg+1);
+    halfGaussPoints.reserve(2*deg+1);
 
     for (int i=0; i < deg+1; i++) {
         gaussPoints.push_back(-cos(i*PI/deg));
@@ -41,6 +44,12 @@ QuadTreeMesh::QuadTreeMesh(int deg, int nx, int ny, double Lx, double Ly) {
     for (double gp : gaussPoints) {
         halfGaussPoints.push_back((gp+1)/2 - 1);
     }
+    for (int i=1; i<deg+1; i++) {
+        double gp = gaussPoints[i];
+        halfGaussPoints.push_back((gp+1)/2);
+    }
+    nodePositions = AllNodePos();
+    ClassifyNodes();
 }
 
 std::vector<std::shared_ptr<Cell>> QuadTreeMesh::GetTopNeighborCells(int x, int y) {
@@ -148,7 +157,6 @@ std::vector<int> QuadTreeMesh::GetGlobalBoundaryNodes(Direction direction, int C
 
 std::vector<std::array<double,2>> QuadTreeMesh::AllNodePos() {
     std::vector<std::array<double,2>> out; out.reserve(numLeaves*numElemNodes);
-    auto leaves = GetAllCells();
     double x; double y;
     std::array<double,2> center;
     double ax; double bx;
@@ -168,6 +176,14 @@ std::vector<std::array<double,2>> QuadTreeMesh::AllNodePos() {
         }
     }
 
+    return out;
+}
+
+std::vector<std::array<double,2>> QuadTreeMesh::GetNodePos(std::vector<int> nodes) {
+    std::vector<std::array<double,2>> out; out.reserve(nodes.size());
+    for (int node : nodes) {
+        out.push_back(nodePositions[node]);
+    }
     return out;
 }
 
@@ -220,6 +236,8 @@ void QuadTreeMesh::Refine(std::vector<std::shared_ptr<Cell>> cells) {
 
     leaves = GetAllCells();
     assignNodes();
+    ClassifyNodes();
+    nodePositions = AllNodePos();
 }
 
 std::vector<std::shared_ptr<Cell>> QuadTreeMesh::GetCellNeighbors(Direction direction, int CID) {
@@ -277,6 +295,49 @@ std::shared_ptr<Cell> QuadTreeMesh::geqNeighbor(Direction direction, std::shared
     } else {
         return node->children[c2];
     }
+}
+
+void QuadTreeMesh::ClassifyNodes() {
+    freeNodes.clear();
+    boundaryNodes.clear(); boundaryNodes.reserve(4); // std::vector<std::vector<int>>
+
+    std::vector<int> nBound;
+    std::vector<int> eBound;
+    std::vector<int> sBound;
+    std::vector<int> wBound;
+
+    std::vector<int>* boundPtrs[4] = {&nBound, &eBound, &sBound, &wBound};
+
+    std::array<Direction,4> dirs = {Direction::N, Direction::E, Direction::S, Direction::W};
+    for (auto leaf : leaves) {
+        int start = leaf->CID*numElemNodes;
+        bool isBound = false;
+        int offsets[4] = {0,0,0,0};
+
+        for (auto dir : dirs) {
+            auto neighbor = geqNeighbor(dir, leaf);
+            if (neighbor == nullptr) {
+                std::vector<int> boundaryN = GetGlobalBoundaryNodes(dir, leaf->CID);
+                if (isBound) {
+                    boundPtrs[dir]->insert(boundPtrs[dir]->end(), boundaryN.begin(), boundaryN.end()-1);
+                } else {
+                    boundPtrs[dir]->insert(boundPtrs[dir]->end(), boundaryN.begin(), boundaryN.end());
+                }
+                isBound = true;
+                offsets[dir] = 1;
+            }
+        }
+        for (int j=offsets[2]; j<deg+1-offsets[0]; j++) {
+            for (int i=offsets[3]; i<deg+1-offsets[1]; i++) {
+                freeNodes.push_back(start+j*(deg+1)+i);
+            } 
+        }
+    }
+
+    boundaryNodes.push_back(nBound);
+    boundaryNodes.push_back(eBound);
+    boundaryNodes.push_back(sBound);
+    boundaryNodes.push_back(wBound);
 }
 
 // std::shared_ptr<Cell> QuadTreeMesh::geqNeighbor(Direction direction, std::shared_ptr<Cell> cell) {

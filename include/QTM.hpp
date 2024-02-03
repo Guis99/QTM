@@ -65,8 +65,9 @@ namespace QTM {
             int numLeaves;
             std::vector<double> gaussPoints;
             std::vector<double> halfGaussPoints;
-            std::vector<int> boundaryNodes;
+            std::vector<std::vector<int>> boundaryNodes;
             std::vector<int> freeNodes;
+            std::vector<std::array<double,2>> nodePositions;
 
             QuadTreeMesh(int deg, int nx, int ny, double Lx, double Ly);
 
@@ -74,15 +75,14 @@ namespace QTM {
             std::vector<std::shared_ptr<Cell>> GetCellNeighbors(Direction direction, int CID);
             std::shared_ptr<Cell> geqNeighbor(Direction direction, std::shared_ptr<Cell> cell);
             std::vector<std::shared_ptr<Cell>> GetAllCells();
-            std::vector<int> GetLocalBoundaryNodes(Direction direction);
-            std::vector<int> GetGlobalBoundaryNodes(Direction direction, int CID);
+            std::vector<int> GetLocalBoundaryNodes(Direction direction); // edge node indices within cell
+            std::vector<int> GetGlobalBoundaryNodes(Direction direction, int CID); // global indices of edge nodes
             std::vector<std::array<double,2>> GetNodePos(std::vector<int> nodes);
             std::vector<std::array<double,2>> AllNodePos();
-            std::vector<int> getBoundaryNodes() {return boundaryNodes;};
-            std::vector<int> getFreeNodes() {return freeNodes;};
+            void ClassifyNodes(); // determines nodes on domain boundary and interior
             void Refine(std::vector<std::shared_ptr<Cell>> cells);
             void assignNodes();
-            int nNodes() {return (deg+1)*(deg+1)*leaves.size();};
+            int nNodes() {return numElemNodes*leaves.size();};
     };
 }
 
