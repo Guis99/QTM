@@ -31,27 +31,49 @@ int main() {
     // Initialize your quadtree here
 
 
-    int nx = 4; int ny = 3;
-    QuadTreeMesh mesh(5, nx, ny, nx, ny);
+    int nx = 2; int ny = 2;
+    QuadTreeMesh mesh(2, nx, ny, nx, ny);
     
     mesh.leaves = mesh.GetAllCells();
     mesh.assignNodes();
 
-    std::vector<std::shared_ptr<Cell>> toRefine = {mesh.leaves[5], mesh.leaves[6]};
+    std::vector<std::shared_ptr<Cell>> toRefine = {mesh.leaves[0], mesh.leaves[3]};
     mesh.Refine(toRefine);
 
-    toRefine = {mesh.leaves[5],mesh.leaves[6],mesh.leaves[7],mesh.leaves[8],
-                mesh.leaves[9],mesh.leaves[10],mesh.leaves[11],mesh.leaves[12]};
-    mesh.Refine(toRefine);
+    auto boundaryNodes = mesh.boundaryNodes;
+    auto freeNodes = mesh.freeNodes;
 
-    toRefine = {mesh.leaves[14],mesh.leaves[15],mesh.leaves[16],mesh.leaves[17],
-                mesh.leaves[18],mesh.leaves[19],mesh.leaves[20],mesh.leaves[21],
-                mesh.leaves[22],mesh.leaves[23],mesh.leaves[24],mesh.leaves[25],
-                mesh.leaves[26],mesh.leaves[27],mesh.leaves[28],mesh.leaves[29]};
-    mesh.Refine(toRefine);
 
-    toRefine = {mesh.leaves[33]};
-    mesh.Refine(toRefine);
+    std::cout<<"free nodes: "<<std::endl;
+    for (int node : freeNodes) {
+        std::cout<<node<<std::endl;
+    }
+
+    int nb = 0;
+    std::cout<<"boundary nodes: "<<std::endl;
+    for (auto vec : boundaryNodes) {
+        std::cout<<"bound:"<<std::endl;
+        for (auto node : vec) {
+            std::cout<<node<<std::endl;
+        }
+        nb+=vec.size();
+    }
+
+    std::cout<<"num boundary: "<<nb<<std::endl;
+    std::cout<<"num free: "<<freeNodes.size()<<std::endl;
+
+    // toRefine = {mesh.leaves[5],mesh.leaves[6],mesh.leaves[7],mesh.leaves[8],
+    //             mesh.leaves[9],mesh.leaves[10],mesh.leaves[11],mesh.leaves[12]};
+    // mesh.Refine(toRefine);
+
+    // toRefine = {mesh.leaves[14],mesh.leaves[15],mesh.leaves[16],mesh.leaves[17],
+    //             mesh.leaves[18],mesh.leaves[19],mesh.leaves[20],mesh.leaves[21],
+    //             mesh.leaves[22],mesh.leaves[23],mesh.leaves[24],mesh.leaves[25],
+    //             mesh.leaves[26],mesh.leaves[27],mesh.leaves[28],mesh.leaves[29]};
+    // mesh.Refine(toRefine);
+
+    // toRefine = {mesh.leaves[33]};
+    // mesh.Refine(toRefine);
 
     // std::cout<<mesh.leaves.size()<<std::endl;
     
