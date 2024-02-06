@@ -37,7 +37,7 @@ int main() {
     mesh.leaves = mesh.GetAllCells();
     mesh.assignNodes();
 
-    std::vector<std::shared_ptr<Cell>> toRefine = {mesh.leaves[0], mesh.leaves[3]};
+    std::vector<std::shared_ptr<Cell>> toRefine = {mesh.leaves[0], mesh.leaves[2]};
     mesh.Refine(toRefine);
 
     auto boundaryNodes = mesh.boundaryNodes;

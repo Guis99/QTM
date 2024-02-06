@@ -340,7 +340,7 @@ void QuadTreeMesh::ClassifyNodes() {
         if (neighborN == nullptr) {
             std::vector<int> boundaryN = GetGlobalBoundaryNodes(Direction::N, leaf->CID);
             if (isBound) {
-                nBound.insert(nBound.end(), boundaryN.begin(), boundaryN.end()-1);
+                nBound.insert(nBound.end(), boundaryN.begin()+1, boundaryN.end());
             } else {
                 nBound.insert(nBound.end(), boundaryN.begin(), boundaryN.end());
             }
@@ -374,8 +374,11 @@ void QuadTreeMesh::ClassifyNodes() {
 
         auto neighborW = geqNeighbor(Direction::W, leaf);
         if (neighborW == nullptr) {
+            if (leaf->CID==2) {
+                std::cout<<isBound<<", "<<static_cast<int>(geqNeighbor(Direction::S, leaf) == nullptr)<<std::endl;
+            }
             std::vector<int> boundaryW = GetGlobalBoundaryNodes(Direction::W, leaf->CID);
-            if (isBound) {
+            if (isBound && geqNeighbor(Direction::S, leaf) == nullptr) {
                 wBound.insert(wBound.end(), boundaryW.begin()+1, boundaryW.end());
             } else {
                 wBound.insert(wBound.end(), boundaryW.begin(), boundaryW.end());
