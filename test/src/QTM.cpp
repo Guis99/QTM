@@ -21,7 +21,7 @@ QuadTreeMesh::QuadTreeMesh(int deg, int nx, int ny, double Lx, double Ly) {
             nextCell->CID = CID; nextCell->topIdx = CID; CID++;
             topCells.push_back(nextCell);
             if (x==0 || x==nx-1 || y==0 || y==ny-1) {
-                boundaryCells.push_back(nextCell);
+                nextCell->isBoundary = true;
             }
         }
     }
@@ -31,10 +31,7 @@ QuadTreeMesh::QuadTreeMesh(int deg, int nx, int ny, double Lx, double Ly) {
             topNeighbors.push_back(GetTopNeighborCells(x, y));
         }
     }
-
-    leaves = topCells;
     numLeaves = nx*ny;
-    assignNodes();
     gaussPoints.reserve(deg+1);
     halfGaussPoints.reserve(2*deg+1);
 
@@ -48,11 +45,14 @@ QuadTreeMesh::QuadTreeMesh(int deg, int nx, int ny, double Lx, double Ly) {
         double gp = gaussPoints[i];
         halfGaussPoints.push_back((gp+1)/2);
     }
-    std::cout<<"here1"<<std::endl;
-    nodePositions = AllNodePos();
-    std::cout<<"here2"<<std::endl;
+    std::cout<<"h1"<<std::endl;
+    leaves = topCells;
+    std::cout<<"h1"<<std::endl;
+    assignNodes();
+    std::cout<<"h1"<<std::endl;
     ClassifyNodes();
-    std::cout<<"here3"<<std::endl;
+    std::cout<<"h1"<<std::endl;
+    nodePositions = AllNodePos();
 }
 
 std::vector<std::shared_ptr<Cell>> QuadTreeMesh::GetTopNeighborCells(int x, int y) {
@@ -158,6 +158,17 @@ std::vector<int> QuadTreeMesh::GetGlobalBoundaryNodes(Direction direction, int C
     return out;
 }
 
+std::vector<int> QuadTreeMesh::GetGlobalElemNodes(Direction direction, int CID) {
+    std::vector<int> out; out.reserve(numElemNodes);
+    int start = CID*numElemNodes;
+    for (int i=start; i<start+numElemNodes; i++) {
+        if (nodeClass[i]) {
+            out.push_back(i);
+        }
+    }
+    return out;
+}
+
 std::vector<std::array<double,2>> QuadTreeMesh::AllNodePos() {
     std::vector<std::array<double,2>> out; out.reserve(numLeaves*numElemNodes);
     double x; double y;
@@ -237,15 +248,14 @@ void QuadTreeMesh::Refine(std::vector<std::shared_ptr<Cell>> cells) {
         }
     }
 
-    std::cout<<"here4"<<std::endl;
+    std::cout<<"h2"<<std::endl;
     leaves = GetAllCells();
-    std::cout<<"here5"<<std::endl;
+    std::cout<<"h2"<<std::endl;
     assignNodes();
-    std::cout<<"here6"<<std::endl;
+    std::cout<<"h2"<<std::endl;
     ClassifyNodes();
-    std::cout<<"here7"<<std::endl;
+    std::cout<<"h2"<<std::endl;
     nodePositions = AllNodePos();
-    std::cout<<"here8"<<std::endl;
 }
 
 std::vector<std::shared_ptr<Cell>> QuadTreeMesh::GetCellNeighbors(Direction direction, int CID) {
@@ -256,6 +266,7 @@ std::vector<std::shared_ptr<Cell>> QuadTreeMesh::GetCellNeighbors(Direction dire
         out = cell->subneighbors(neighbor, direction);
         return out;
     } else {
+        out.push_back(nullptr);
         return out;
     }
 }
@@ -306,6 +317,7 @@ std::shared_ptr<Cell> QuadTreeMesh::geqNeighbor(Direction direction, std::shared
 }
 
 void QuadTreeMesh::ClassifyNodes() {
+    nodeClass.clear(); nodeClass.resize(numElemNodes * leaves.size());
     freeNodes.clear();
     boundaryNodes.clear(); boundaryNodes.reserve(4); // std::vector<std::vector<int>>
 
@@ -313,8 +325,6 @@ void QuadTreeMesh::ClassifyNodes() {
     std::vector<int> eBound;
     std::vector<int> sBound;
     std::vector<int> wBound;
-
-    std::vector<int>* boundPtrs[4] = {&nBound, &eBound, &sBound, &wBound};
 
     std::array<Direction,4> dirs = {Direction::N, Direction::E, Direction::S, Direction::W};
     for (auto leaf : leaves) {
@@ -374,9 +384,6 @@ void QuadTreeMesh::ClassifyNodes() {
 
         auto neighborW = geqNeighbor(Direction::W, leaf);
         if (neighborW == nullptr) {
-            if (leaf->CID==2) {
-                std::cout<<isBound<<", "<<static_cast<int>(geqNeighbor(Direction::S, leaf) == nullptr)<<std::endl;
-            }
             std::vector<int> boundaryW = GetGlobalBoundaryNodes(Direction::W, leaf->CID);
             if (isBound && geqNeighbor(Direction::S, leaf) == nullptr) {
                 wBound.insert(wBound.end(), boundaryW.begin()+1, boundaryW.end());
@@ -389,7 +396,9 @@ void QuadTreeMesh::ClassifyNodes() {
 
         for (int j=offsets[2]; j<deg+1-offsets[0]; j++) {
             for (int i=offsets[3]; i<deg+1-offsets[1]; i++) {
-                freeNodes.push_back(start+j*(deg+1)+i);
+                int nodeNum = start+j*(deg+1)+i;
+                freeNodes.push_back(nodeNum);
+                nodeClass[nodeNum] = true;
             } 
         }
     }
@@ -398,4 +407,9 @@ void QuadTreeMesh::ClassifyNodes() {
     boundaryNodes.push_back(eBound);
     boundaryNodes.push_back(sBound);
     boundaryNodes.push_back(wBound);
+    for (auto nodes : boundaryNodes) {
+        for (auto node : nodes) {
+            nodeClass[node] = false;
+        }
+    }
 }

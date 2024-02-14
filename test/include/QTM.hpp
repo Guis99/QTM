@@ -48,6 +48,7 @@ namespace QTM {
             void setNodes(std::array<int,2> &&nodes) { this->nodes = nodes; }
             int selfdelete();
             bool isLeaf() { return isaLeaf; }
+            bool isBoundary = false;
         private:
             bool isaLeaf = true;
     };
@@ -68,6 +69,7 @@ namespace QTM {
             std::vector<std::vector<int>> boundaryNodes;
             std::vector<int> freeNodes;
             std::vector<std::array<double,2>> nodePositions;
+            std::vector<bool> nodeClass;
 
             QuadTreeMesh(int deg, int nx, int ny, double Lx, double Ly);
 
@@ -77,6 +79,7 @@ namespace QTM {
             std::vector<std::shared_ptr<Cell>> GetAllCells();
             std::vector<int> GetLocalBoundaryNodes(Direction direction); // edge node indices within cell
             std::vector<int> GetGlobalBoundaryNodes(Direction direction, int CID); // global indices of edge nodes
+            std::vector<int> GetGlobalElemNodes(Direction direction, int CID);
             std::vector<std::array<double,2>> GetNodePos(std::vector<int> nodes);
             std::vector<std::array<double,2>> AllNodePos();
             void ClassifyNodes(); // determines nodes on domain boundary and interior
