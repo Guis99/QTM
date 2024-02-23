@@ -79,7 +79,8 @@ namespace QTM {
             std::vector<std::shared_ptr<Cell>> GetAllCells();
             std::vector<int> GetLocalBoundaryNodes(Direction direction); // edge node indices within cell
             std::vector<int> GetGlobalBoundaryNodes(Direction direction, int CID); // global indices of edge nodes
-            std::vector<int> GetGlobalElemNodes(Direction direction, int CID);
+            std::vector<int> GetGlobalElemNodes(int CID);
+            std::vector<int> GetTrimmedLocalNodes(int CID, std::vector<int>& globalNodes);
             std::vector<std::array<double,2>> GetNodePos(std::vector<int> nodes);
             std::vector<std::array<double,2>> AllNodePos();
             void ClassifyNodes(); // determines nodes on domain boundary and interior

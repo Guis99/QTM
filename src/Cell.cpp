@@ -25,18 +25,22 @@ std::vector<std::shared_ptr<Cell>> Cell::subneighbors(std::shared_ptr<Cell> neig
     switch (direction) {
         case Direction::N : {
             c1 = Child::SW; c2 = Child::SE;
+            break;
         }
 
         case Direction::E : {
-            c1 = Child::NW; c2 = Child::SW;
+            c1 = Child::SW; c2 = Child::NW;
+            break;
         }
 
         case Direction::S : {
             c1 = Child::NW; c2 = Child::NE;
+            break;
         }
 
         case Direction::W : {
-            c1 = Child::NE; c2 = Child::SE;
+            c1 = Child::SE; c2 = Child::NE;
+            break;
         }
     }
 
