@@ -10,6 +10,8 @@ Cell::Cell(std::shared_ptr<Cell> parent, int level, double width, double xPos, d
     this->height = width;
 }
 
+// test
+
 Cell::Cell(std::shared_ptr<Cell> parent, int level, double width, double height, double xPos, double yPos) {
     this->parent = parent;
     this->level = level;
