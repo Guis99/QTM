@@ -7,6 +7,15 @@ Cell::Cell(std::shared_ptr<Cell> parent, int level, double width, double xPos, d
     this->level = level;
     this->center = { xPos, yPos };
     this->width = width;
+    this->height = width;
+}
+
+Cell::Cell(std::shared_ptr<Cell> parent, int level, double width, double height, double xPos, double yPos) {
+    this->parent = parent;
+    this->level = level;
+    this->center = { xPos, yPos };
+    this->width = width;
+    this->height = height;
 }
 
 Cell::Cell(int CID, std::shared_ptr<Cell> parent, int level, double width, double xPos, double yPos) {

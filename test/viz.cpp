@@ -41,10 +41,8 @@ int main() {
     // Initialize your quadtree here
 
 
-    int nx = 4; int ny = 4;
+    int nx = 1; int ny = 1;
     QuadTreeMesh mesh(2, nx, ny, nx, ny);
-
-    std::vector<std::shared_ptr<Cell>> toRefine;
 
     // std::vector<std::shared_ptr<Cell>> toRefine = {mesh.leaves[0], mesh.leaves[2]};
     // mesh.Refine(toRefine);
@@ -71,26 +69,35 @@ int main() {
     // std::cout<<"num boundary: "<<nb<<std::endl;
     // std::cout<<"num free: "<<freeNodes.size()<<std::endl;
 
-    std::cout<<"hi1"<<std::endl;
-    toRefine = {mesh.leaves[5],mesh.leaves[6],mesh.leaves[7],mesh.leaves[8],
-                mesh.leaves[9],mesh.leaves[10],mesh.leaves[11],mesh.leaves[12]};
-    std::cout<<"hi2"<<std::endl;
-    mesh.Refine(toRefine);
-    std::cout<<"hi3"<<std::endl;
-
-    toRefine = {mesh.leaves[14],mesh.leaves[15],mesh.leaves[16],mesh.leaves[17],
-                mesh.leaves[18],mesh.leaves[19],mesh.leaves[20],mesh.leaves[21],
-                mesh.leaves[22],mesh.leaves[23],mesh.leaves[24],mesh.leaves[25],
-                mesh.leaves[26],mesh.leaves[27],mesh.leaves[28],mesh.leaves[29]};
+    std::vector<std::shared_ptr<Cell>> toRefine;
+    toRefine = {mesh.leaves[0]};
     mesh.Refine(toRefine);
 
-    toRefine = {mesh.leaves[33]};
+    toRefine = {mesh.leaves[0],mesh.leaves[2]};
     mesh.Refine(toRefine);
+    // std::cout<<"hi1"<<std::endl;
+    // toRefine = {mesh.leaves[5],mesh.leaves[6],mesh.leaves[7],mesh.leaves[8],
+    //             mesh.leaves[9],mesh.leaves[10],mesh.leaves[11],mesh.leaves[12]};
+    // std::cout<<"hi2"<<std::endl;
+    // mesh.Refine(toRefine);
+    // std::cout<<"hi3"<<std::endl;
 
-    std::cout<<mesh.leaves.size()<<std::endl;
+    // toRefine = {mesh.leaves[14],mesh.leaves[15],mesh.leaves[16],mesh.leaves[17],
+    //             mesh.leaves[18],mesh.leaves[19],mesh.leaves[20],mesh.leaves[21],
+    //             mesh.leaves[22],mesh.leaves[23],mesh.leaves[24],mesh.leaves[25],
+    //             mesh.leaves[26],mesh.leaves[27],mesh.leaves[28],mesh.leaves[29]};
+    // mesh.Refine(toRefine);
+
+    // toRefine = {mesh.leaves[33]};
+    // mesh.Refine(toRefine);
+
+    // std::cout<<mesh.leaves.size()<<std::endl;
     
-    toRefine = {mesh.leaves[15]};
-    mesh.Refine(toRefine);
+    // toRefine = {mesh.leaves[15]};
+    // mesh.Refine(toRefine);
+
+    // toRefine = {mesh.leaves[2], mesh.leaves[29]};
+    // mesh.Refine(toRefine);
 
     // toRefine = {mesh.leaves[25], mesh.leaves[35]};
     // mesh.Refine(toRefine);
@@ -143,6 +150,26 @@ int main() {
 
     std::ofstream outFile("quadtree.json");
     exportToJson(mesh, outFile);
+
+    std::cout<<"North boundaries:"<<std::endl;
+    for (const auto& cell : mesh.boundaryCells[0]) {
+        std::cout<<cell->CID<<std::endl;
+    }
+
+    std::cout<<"East boundaries:"<<std::endl;
+    for (const auto& cell : mesh.boundaryCells[1]) {
+        std::cout<<cell->CID<<std::endl;
+    }
+
+    std::cout<<"South boundaries:"<<std::endl;
+    for (const auto& cell : mesh.boundaryCells[2]) {
+        std::cout<<cell->CID<<std::endl;
+    }
+
+    std::cout<<"West boundaries:"<<std::endl;
+    for (const auto& cell : mesh.boundaryCells[3]) {
+        std::cout<<cell->CID<<std::endl;
+    }
     // outFile << "{";
     // outFile << "\"x\": " << 0 << ",\n ";
     // outFile << "\"y\": " << 0 << ",\n ";

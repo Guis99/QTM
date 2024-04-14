@@ -28,6 +28,7 @@ namespace QTM {
             int CID; int topIdx;
             int deg;
             double width;
+            double height;
             std::array<double, 2> center;
 
             int level;
@@ -35,6 +36,7 @@ namespace QTM {
             std::array<int,2> nodes;
 
             Cell(std::shared_ptr<Cell> parent, int level, double width, double xPos, double yPos);
+            Cell(std::shared_ptr<Cell> parent, int level, double width, double height, double xPos, double yPos);
             Cell(int CID, std::shared_ptr<Cell> parent, int level, double width, double xPos, double yPos);
 
             std::shared_ptr<Cell> getptr () { return shared_from_this(); }
@@ -58,7 +60,7 @@ namespace QTM {
             std::vector<std::shared_ptr<Cell>> topCells;
             std::vector<std::vector<std::shared_ptr<Cell>>> topNeighbors;
             std::vector<std::shared_ptr<Cell>> leaves;
-            std::vector<std::shared_ptr<Cell>> boundaryCells;
+            std::vector<std::vector<std::shared_ptr<Cell>>> boundaryCells;
 
             int nx; int ny;
             int deg;

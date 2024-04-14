@@ -10,21 +10,40 @@ QuadTreeMesh::QuadTreeMesh(int deg, int nx, int ny, double Lx, double Ly) {
     double dx = Lx / nx; 
     double dy = Ly / ny;
 
+    // declare vectors of boundary cells
+    std::vector<std::shared_ptr<Cell>> NB;
+    std::vector<std::shared_ptr<Cell>> EB;
+    std::vector<std::shared_ptr<Cell>> SB;
+    std::vector<std::shared_ptr<Cell>> WB;
+    
     // Loop to populate initial mesh with cells
     int CID = 0;
     topCells.reserve(nx*ny);
     topNeighbors.reserve(nx*ny);
-    boundaryCells.reserve(2*(nx+ny-2));
     for (int y=0; y<ny; y++) {
         for (int x=0; x<nx; x++) {
             auto nextCell = std::make_shared<Cell>(nullptr, 0, dx/2, dx/2 + x*dx, dx/2 + y*dx);
             nextCell->CID = CID; nextCell->topIdx = CID; CID++;
             topCells.push_back(nextCell);
-            if (x==0 || x==nx-1 || y==0 || y==ny-1) {
-                nextCell->isBoundary = true;
+            // if (x==0 || x==nx-1 || y==0 || y==ny-1) {
+            //     nextCell->isBoundary = true;
+            // }
+            if (y==0) {
+                SB.push_back(nextCell);
+            }
+            if (y==ny-1) {
+                NB.push_back(nextCell);
+            }
+            if (x==0) {
+                WB.push_back(nextCell);
+            }
+            if (x==nx-1) {
+                EB.push_back(nextCell);
             }
         }
     }
+
+    boundaryCells = {NB, EB, SB, WB};
 
     for (int y=0; y<ny; y++) {
         for (int x=0; x<nx; x++) {
@@ -74,6 +93,7 @@ std::vector<std::shared_ptr<Cell>> QuadTreeMesh::GetTopNeighborCells(int x, int 
 }
 
 void QuadTreeMesh::assignNodes() {
+    // assign nodes to new cells and label cells with CID
     int currNode = 0;
     int CID = 0;
     int numElementNodes = (deg+1)*(deg+1);
@@ -254,6 +274,51 @@ void QuadTreeMesh::Refine(std::vector<std::shared_ptr<Cell>> cells) {
         }
     }
 
+    // Find all new boundary cells
+    std::vector<std::shared_ptr<Cell>> newNB;
+    std::vector<std::shared_ptr<Cell>> newEB;
+    std::vector<std::shared_ptr<Cell>> newSB;
+    std::vector<std::shared_ptr<Cell>> newWB;
+
+    for (const auto& cell : boundaryCells[0]) {
+        if (!cell->isLeaf()) {
+            newNB.push_back(cell->children[3]);
+            newNB.push_back(cell->children[0]);
+        } else {
+            newNB.push_back(cell);
+        }
+    }
+
+    for (const auto& cell : boundaryCells[1]) {
+        if (!cell->isLeaf()) {
+            newEB.push_back(cell->children[1]);
+            newEB.push_back(cell->children[0]);
+        } else {
+            newEB.push_back(cell);
+        }
+    }
+
+    for (const auto& cell : boundaryCells[2]) {
+        if (!cell->isLeaf()) {
+            newSB.push_back(cell->children[2]);
+            newSB.push_back(cell->children[1]);
+        } else {
+            newSB.push_back(cell);
+        }
+    }
+
+    for (const auto& cell : boundaryCells[3]) {
+        if (!cell->isLeaf()) {
+            newWB.push_back(cell->children[2]);
+            newWB.push_back(cell->children[3]); 
+        } else {
+            newWB.push_back(cell);
+        }
+    }
+
+    boundaryCells = {newNB, newEB, newSB, newWB};
+
+    // cleanup + bookkeeping
     leaves = GetAllCells();
     assignNodes();
     ClassifyNodes();
@@ -270,7 +335,7 @@ std::vector<std::shared_ptr<Cell>> QuadTreeMesh::GetCellNeighbors(Direction dire
         out = cell->subneighbors(neighbor, direction);
         return out;
     } else {
-        out.push_back(nullptr);
+        out = {nullptr};
         return out;
     }
 }
