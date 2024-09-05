@@ -482,3 +482,28 @@ void QuadTreeMesh::ClassifyNodes() {
         }
     }
 }
+
+void QuadTreeMesh::exportToJson(std::ostream& out) {
+    std::vector<std::shared_ptr<Cell>> allLeaves = this->leaves;
+
+    out << "{";
+    out << "\"children\": [\n";
+
+    out << "{";
+    out << "\"x\": " << allLeaves[0]->center[0] << ", ";
+    out << "\"y\": " << allLeaves[0]->center[1] << ", ";
+    out << "\"width\": " << 2*allLeaves[0]->width << ", ";
+    out << "\"level\": " << allLeaves[0]->level << ", ";
+    out << "\"CID\": " << allLeaves[0]->CID << "}\n ";
+
+    for (int i=1; i<allLeaves.size(); i++) {
+        auto leaf = allLeaves[i];
+        out <<",{";
+        out << "\"x\": " << leaf->center[0] << ", ";
+        out << "\"y\": " << leaf->center[1] << ", ";
+        out << "\"width\": " << 2*leaf->width << ", ";
+        out << "\"level\": " << leaf->level << ", ";
+        out << "\"CID\": " << leaf->CID << "}\n ";
+    }
+    out << "]}";
+}

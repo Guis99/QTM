@@ -89,6 +89,8 @@ namespace QTM {
             void Refine(std::vector<std::shared_ptr<Cell>> cells);
             void assignNodes();
             int nNodes() {return numElemNodes*leaves.size();};
+
+            void exportToJson(std::ostream& out);
     };
 }
 
