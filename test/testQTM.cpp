@@ -1,4 +1,4 @@
-#include "..\include\QTM.hpp"
+#include "../include/QTM.hpp"
 
 using namespace QTM;
 
@@ -30,7 +30,7 @@ int main() {
     } 
 
     mesh.numLeaves = 46;
-    std::cout<<"test1:"<<std::endl;
+    std::cout<<"test 1:"<<std::endl;
     std::cout<<score[numsExp]<<std::endl;
     std::cout<<score[mesh.GetAllCells().size() == 46]<<std::endl;
 
@@ -56,7 +56,7 @@ int main() {
     } 
 
     mesh.numLeaves = 400;
-    std::cout<<"test2:"<<std::endl;
+    std::cout<<"test 2:"<<std::endl;
     std::cout<<score[numsExp]<<std::endl;
     std::cout<<score[mesh.GetAllCells().size() == 400]<<std::endl;
 
@@ -84,12 +84,12 @@ int main() {
         for (auto leaf : leaves) {
             numsExp &= leaf->nodes[0] == currNode && leaf->nodes[1] == currNode + numElementNodes - 1;
             currNode += numElementNodes;
-            std::cout<<leaf->CID<<": "<<leaf->level<<std::endl;
+            DEBUG_PRINT(leaf->CID,": ",leaf->level);
         }
     } 
 
     mesh.numLeaves = 25;
-    std::cout<<"test3:"<<std::endl;
+    std::cout<<"test 3:"<<std::endl;
     std::cout<<score[numsExp]<<std::endl;
     std::cout<<score[mesh.GetAllCells().size() == 25]<<std::endl;
 

@@ -1,4 +1,4 @@
-#include "..\include\QTM.hpp"
+#include "../include/QTM.hpp"
 
 using namespace QTM;
 
@@ -8,7 +8,7 @@ int main() {
     std::unordered_map<bool, std::string> score;
     score[true] = "pass"; score[false] = "fail";
 
-    std::cout<<"test1"<<std::endl;
+    std::cout<<"test 1"<<std::endl;
     int nx = 1; int ny = 1;
     QuadTreeMesh mesh(5, nx, ny, 1, 1);
     
@@ -22,17 +22,17 @@ int main() {
 
     std::cout<<score[leaves.size() == 10]<<std::endl;
 
-    std::cout<<mesh.leaves.size()<<std::endl;
+    DEBUG_PRINT(mesh.leaves.size());
     for (auto leaf : mesh.leaves) {
-        std::cout<<leaf->CID<<std::endl;
+        DEBUG_PRINT(leaf->CID);
     }
 
     std::vector<std::shared_ptr<Cell>> toRefine = {leaves[5], leaves[6]};
 
     mesh.Refine(toRefine);
-    std::cout<<mesh.leaves.size()<<std::endl;
-    std::cout<<mesh.topCells[0]->children[3]->isLeaf()<<std::endl;
-    std::cout<<score[mesh.leaves.size() == 19];
+    DEBUG_PRINT(mesh.leaves.size());
+    DEBUG_PRINT(mesh.topCells[0]->children[3]->isLeaf());
+    std::cout<<score[mesh.leaves.size() == 19]<<std::endl;
 
     return 0;
 }

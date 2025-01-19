@@ -1,4 +1,4 @@
-#include "..\include\QTM.hpp"
+#include "../include/QTM.hpp"
 
 using namespace QTM;
 
@@ -249,14 +249,14 @@ void QuadTreeMesh::Refine(std::vector<std::shared_ptr<Cell>> cells) {
     // balancing
     std::stack<std::shared_ptr<Cell>> toRefine;
 
-    std::cout<<"pushing to stack"<<std::endl;
+    DEBUG_PRINT("pushing to stack");
     // fill stack with cells that need balancing
     for (auto cell : initNeighbors) {
         toRefine.push(cell);
     }
 
     // iterate over cells to refine
-    std::cout<<"recursively subdividing neighbors"<<std::endl;
+    DEBUG_PRINT("recursively subdividing neighbors");
     std::shared_ptr<Cell> currCell;
     while (toRefine.size() > 0) {
         currCell = toRefine.top();

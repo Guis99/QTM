@@ -1,6 +1,6 @@
 #include <fstream>
 #include <iostream>
-#include "..\include\QTM.hpp"
+#include "../include/QTM.hpp"
 
 using namespace QTM;
 

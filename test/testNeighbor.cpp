@@ -1,4 +1,4 @@
-#include "..\include\QTM.hpp"
+#include "../include/QTM.hpp"
 
 using namespace QTM;
 
@@ -31,21 +31,21 @@ int main() {
         CID++;
     }
 
-    auto neighborS = tree1ptr->children[0]->children[2]->children[2]->geqNeighbor(Direction::S);
-    auto neighborN = tree1ptr->children[0]->children[2]->children[2]->geqNeighbor(Direction::N);
-    auto neighborE = tree1ptr->children[0]->children[2]->children[2]->geqNeighbor(Direction::E);
-    auto neighborW = tree1ptr->children[0]->children[2]->children[2]->geqNeighbor(Direction::W);
+    auto neighborS = mesh.geqNeighbor(Direction::S, tree1ptr->children[0]->children[2]->children[2]);
+    auto neighborN = mesh.geqNeighbor(Direction::N, tree1ptr->children[0]->children[2]->children[2]);
+    auto neighborE = mesh.geqNeighbor(Direction::E, tree1ptr->children[0]->children[2]->children[2]);
+    auto neighborW = mesh.geqNeighbor(Direction::W, tree1ptr->children[0]->children[2]->children[2]);
 
-    std::cout<<neighborS->CID<<", "<<score[neighborS->CID == 7]<<std::endl;
-    std::cout<<neighborN->CID<<", "<<score[neighborN->CID == 5]<<std::endl;
-    std::cout<<neighborE->CID<<", "<<score[neighborE->CID == 3]<<std::endl;
+    std::cout<<neighborS->CID<<": "<<score[neighborS->CID == 7]<<std::endl;
+    std::cout<<neighborN->CID<<": "<<score[neighborN->CID == 5]<<std::endl;
+    std::cout<<neighborE->CID<<": "<<score[neighborE->CID == 3]<<std::endl;
     std::cout<<score[neighborW == tree1ptr->children[3]->children[1]->children[1]]<<std::endl;
 
-    std::cout<<tree1ptr->children[0]->children[2]->children[2]->CID<<", "<<neighborN->CID<<", "<<neighborE->CID<<std::endl;
+    DEBUG_PRINT(tree1ptr->children[0]->children[2]->children[2]->CID,", ",neighborN->CID,", ",neighborE->CID);
 
-    std::cout<<"test2"<<std::endl;
+    std::cout<<"test 2"<<std::endl;
     mesh = QuadTreeMesh(1,3,3,1,1);
-    std::cout<<"mesh success"<<std::endl;   
+    DEBUG_PRINT("mesh success");  
 
     mesh.topCells[3]->subdivide();
 
@@ -85,8 +85,6 @@ int main() {
 
 
     std::cout<<score[leaves.size() == 24]<<std::endl;
-    
-
     
     return 0;
 }

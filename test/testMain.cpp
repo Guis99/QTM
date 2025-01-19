@@ -1,4 +1,4 @@
-#include "..\include\QTM.hpp"
+#include "../include/QTM.hpp"
 
 using namespace QTM;
 
@@ -68,7 +68,6 @@ int main() {
     auto tree3ptr = std::make_shared<Cell>(initptr, 0, 1, 0, 0);
     auto leaves3 = tree3ptr->traverse();
     std::cout<<score[leaves3.size() == 1 && tree3ptr == leaves3[0]]<<std::endl;
-    
 
     return 0;
 }
